@@ -100,10 +100,10 @@ class YoloDarknet(CmdObjectDetector):
     #    # in question
     #    pass
 
-    def run(self, img_file='data/dog.jpg', iterations=20):
+    def run(self, img_file='data/dog.jpg', iterations=100):
         for i in xrange(iterations):
             print_bucket = iterations/4
-            if i % print_bucket == 0:
+            if not print_bucket or i % print_bucket == 0:
                 print '%s/%s' %(i, iterations)
             self.cur_iteration = i
             self.run_single(img_file)

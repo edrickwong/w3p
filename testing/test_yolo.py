@@ -8,10 +8,10 @@ sys.path.insert(0, w3p_path)
 from testing.detectors import YoloDarknet
 from testing.config import *
 
-YOLO_TYPE = 'tiny'
+YOLO_TYPE = 'yolo'
 
 def main():
-    base_cmd = "cd ~/darknet && ./darknet detector test cfg/voc.data cfg/tiny-yolo-voc.cfg tiny-yolo.weights"
+    base_cmd = "cd ~/darknet && ./darknet detector test cfg/voc.data cfg/tiny-yolo-voc.cfg tiny-yolo-voc.weights"
     yd = YoloDarknet(YOLO_TYPE, base_cmd)
     yd.run()
     yd.print_summary()
