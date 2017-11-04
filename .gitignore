@@ -1,0 +1,22 @@
+# this file itself #
+.gitignore
+
+# Compiled sources #
+####################
+*.pyc
+*.exe
+
+# ignore swapped files
+*.swp
+*.ssh
+*.swo
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
