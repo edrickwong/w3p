@@ -1,2 +1,3 @@
 numpy==1.13.3
 opencv-python==3.3.0.10
+pyttsx==1.1
