@@ -120,6 +120,8 @@ def detect(net, meta, image, thresh=.05, hier_thresh=.01, nms=.45):
     return res
 
 class LFP(object):
+    EXIT_MSG = "Hope you enjoyed our demo"
+
     def __init__(self):
         self.tts = cmdLineTTS
         self.output = None # container for most recent detection
@@ -152,7 +154,8 @@ class LFP(object):
             try:
                 img_loc = raw_input("\nType in file location of Image:: ")
                 if img_loc.lower().strip() == "exit":
-                    print "Hope you enjoyed"
+                    print self.EXIT_MSG
+                    self.tts.say(self.EXIT_MSG)
                     break
                 elif not img_loc:
                     continue
