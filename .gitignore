@@ -20,3 +20,5 @@ pids
 *.pid
 *.seed
 
+# Virtual envs
+lfp/venv/*
