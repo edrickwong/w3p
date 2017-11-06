@@ -21,4 +21,6 @@ pids
 *.seed
 
 # Virtual envs
-lfp/venv/*
+venv/*
+
+.idea/*

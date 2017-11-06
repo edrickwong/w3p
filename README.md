@@ -12,3 +12,9 @@
 - caffe2
 - tensorflow
 - CNNs
+
+## Setup Notes ##
+- Setup virtualenv
+- pip install -r pip-requirements
+- /lfp requires that darknet is located in ~/user/
+- edit paths in darknet/cfg/coco.data to absolute paths otherwise it'll complain that it cannot find certain files
