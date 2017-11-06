@@ -20,3 +20,7 @@ pids
 *.pid
 *.seed
 
+# Virtual envs
+venv/*
+
+.idea/*
