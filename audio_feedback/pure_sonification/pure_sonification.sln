@@ -1,0 +1,35 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{0E37E632-7956-9361-4F99-3651573C506D}") = "pure_sonification", "Assembly-CSharp-firstpass.csproj", "{F5A6F060-5C42-EAB2-10EF-B257D1E0516C}"
+EndProject
+Project("{0E37E632-7956-9361-4F99-3651573C506D}") = "pure_sonification", "Assembly-CSharp.csproj", "{F96384BC-DFB1-1B75-C966-AB4A4BCEFB55}"
+EndProject
+Project("{0E37E632-7956-9361-4F99-3651573C506D}") = "pure_sonification", "Assembly-CSharp-Editor.csproj", "{06A7CDED-5B2B-E848-FB91-475D45833775}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F5A6F060-5C42-EAB2-10EF-B257D1E0516C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5A6F060-5C42-EAB2-10EF-B257D1E0516C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5A6F060-5C42-EAB2-10EF-B257D1E0516C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5A6F060-5C42-EAB2-10EF-B257D1E0516C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F96384BC-DFB1-1B75-C966-AB4A4BCEFB55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F96384BC-DFB1-1B75-C966-AB4A4BCEFB55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F96384BC-DFB1-1B75-C966-AB4A4BCEFB55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F96384BC-DFB1-1B75-C966-AB4A4BCEFB55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06A7CDED-5B2B-E848-FB91-475D45833775}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06A7CDED-5B2B-E848-FB91-475D45833775}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06A7CDED-5B2B-E848-FB91-475D45833775}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06A7CDED-5B2B-E848-FB91-475D45833775}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal
