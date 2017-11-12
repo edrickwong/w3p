@@ -24,3 +24,4 @@ pids
 venv/*
 
 .idea/*
+audio_feedback/pure_sonification/Temp/*
