@@ -1,7 +1,7 @@
 from ctypes import *
 import math
 import random
-from tts import PythonTTS, cmdLineTTS
+from tts import cmdLineTTS
 
 import os
 darknet_folder = os.path.join(os.path.expanduser('~'), 'darknet')
