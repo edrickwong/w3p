@@ -29,7 +29,7 @@ categories = label_map_util.convert_label_map_to_categories(label_map, max_num_c
 category_index = label_map_util.create_category_index(categories)
 
 
-def detect_objects(image_np, sess, detection_graph, obj):
+def detect_objects(image_np, sess, detection_graph):
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
     image_np_expanded = np.expand_dims(image_np, axis=0)
     image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
@@ -47,43 +47,6 @@ def detect_objects(image_np, sess, detection_graph, obj):
     (boxes, scores, classes, num_detections) = sess.run(
         [boxes, scores, classes, num_detections],
         feed_dict={image_tensor: image_np_expanded})
-    # Wanted objects
-    new_boxes = []
-    new_classes = []
-    found = False
-    # Only show boxes around these classes
-    allowed_classes = ['person','bottle','knife','spoon','fork','cup','bowl','dog']
-    for i in range(len(scores[0])):
-        if category_index[classes[0][i]]['name'] not in allowed_classes:
-            scores[0][i] = 0
-        if category_index[classes[0][i]]['name'] == 'person' and scores[0][i] > 0.5:
-            new_classes.append('person')
-            new_boxes.append(boxes[0][i])
-        if category_index[classes[0][i]]['name'] == obj and scores[0][i] > 0.5:
-            new_classes.append('bottle')
-            new_boxes.append(boxes[0][i])
-    
-    new_boxes = np.squeeze(new_boxes)
-    new_classes = np.squeeze(new_classes)
-    message = ''
-
-    if 'person' in new_classes and obj in new_classes:
-        found = True
-    
-    if found:
-        # do stuff here that calculates orientation of bottle to person
-        if new_classes[0] == 'person':
-            mid_p = (new_boxes[0][1] + new_boxes[0][3])/2
-        else:
-            mid_o = (new_boxes[0][1] + new_boxes[0][3])/2
-        if new_classes[1] == 'person':
-            mid_p = (new_boxes[1][1] + new_boxes[1][3])/2
-        else:
-            mid_o = (new_boxes[1][1] + new_boxes[1][3])/2
-        if mid_p < mid_o:
-            message = obj + ' is to your left'
-        else:
-            message = obj + ' is to your right'
 
     # Visualization of the results of a detection.
     vis_util.visualize_boxes_and_labels_on_image_array(
@@ -94,10 +57,10 @@ def detect_objects(image_np, sess, detection_graph, obj):
         category_index,
         use_normalized_coordinates=True,
         line_thickness=8)
-    return image_np, new_boxes, new_classes, message
+    return image_np
 
 
-def worker(input_q, output_q, found, obj):
+def worker(input_q, output_q):
     # Load a (frozen) Tensorflow model into memory.
     detection_graph = tf.Graph()
     with detection_graph.as_default():
@@ -114,11 +77,7 @@ def worker(input_q, output_q, found, obj):
         fps.update()
         frame = input_q.get()
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image, boxes, classes, mes = detect_objects(frame_rgb, sess, detection_graph, obj)
-        if mes:
-            print mes
-        output_q.put(image)
-        found.put(mes)
+        output_q.put(detect_objects(frame_rgb, sess, detection_graph))
 
     fps.stop()
     sess.close()
@@ -136,8 +95,6 @@ if __name__ == '__main__':
                         default=2, help='Number of workers.')
     parser.add_argument('-q-size', '--queue-size', dest='queue_size', type=int,
                         default=5, help='Size of the queue.')
-    parser.add_argument('-obj','--object', dest='object', type=str,
-                        default='bottle',help='Object to search for.')
     args = parser.parse_args()
 
     logger = multiprocessing.log_to_stderr()
@@ -145,8 +102,7 @@ if __name__ == '__main__':
 
     input_q = Queue(maxsize=args.queue_size)
     output_q = Queue(maxsize=args.queue_size)
-    found = Queue(maxsize=args.queue_size)
-    pool = Pool(args.num_workers, worker, (input_q, output_q, found, args.object))
+    pool = Pool(args.num_workers, worker, (input_q, output_q))
 
     video_capture = WebcamVideoStream(src=args.video_source,
                                       width=args.width,
@@ -167,8 +123,6 @@ if __name__ == '__main__':
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-        if found.get():
-            break
 
     fps.stop()
     print('[INFO] elapsed time (total): {:.2f}'.format(fps.elapsed()))
@@ -176,7 +130,4 @@ if __name__ == '__main__':
 
     pool.terminate()
     video_capture.stop()
-    while True:
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
     cv2.destroyAllWindows()

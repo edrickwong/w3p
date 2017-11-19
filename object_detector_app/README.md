@@ -1,3 +1,9 @@
+# Real-Time Object Detector 
+## To run
+1. `python demo.py --object <object being asked>`
+2. When object and person is found, the program will say where the object is
+3. To close the window, press `q`
+
 # Object-Detector-App
 
 A real-time object recognition application using [Google's TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection) and [OpenCV](http://opencv.org/).
