@@ -49,8 +49,7 @@ def detect_objects(image_np, sess, detection_graph, obj):
         [boxes, scores, classes, num_detections],
         feed_dict={image_tensor: image_np_expanded})
     # Wanted objects
-    new_boxes = []
-    new_classes = []
+    class_box = {}
     found = False
     # Only show boxes around these classes
     allowed_classes = ['person','bottle','knife','spoon','fork','cup','bowl','dog']
@@ -58,33 +57,26 @@ def detect_objects(image_np, sess, detection_graph, obj):
         if category_index[classes[0][i]]['name'] not in allowed_classes:
             scores[0][i] = 0
         if category_index[classes[0][i]]['name'] == 'person' and scores[0][i] > 0.5:
-            new_classes.append('person')
-            new_boxes.append(boxes[0][i])
+ 
+            class_box['person'] = np.squeeze(boxes[0][i])
         if category_index[classes[0][i]]['name'] == obj and scores[0][i] > 0.5:
-            new_classes.append('bottle')
-            new_boxes.append(boxes[0][i])
-    
-    new_boxes = np.squeeze(new_boxes)
-    new_classes = np.squeeze(new_classes)
-    message = ''
+               class_box[obj] = np.squeeze(boxes[0][i])
 
-    if 'person' in new_classes and obj in new_classes:
+
+    if 'person' in class_box.keys() and obj in class_box.keys():
         found = True
     
+    message = ''
+
     if found:
         # do stuff here that calculates orientation of bottle to person
-        if new_classes[0] == 'person':
-            mid_p = (new_boxes[0][1] + new_boxes[0][3])/2
-        else:
-            mid_o = (new_boxes[0][1] + new_boxes[0][3])/2
-        if new_classes[1] == 'person':
-            mid_p = (new_boxes[1][1] + new_boxes[1][3])/2
-        else:
-            mid_o = (new_boxes[1][1] + new_boxes[1][3])/2
+        mid_p = (class_box.get('person')[1] + class_box.get('person')[3])/2
+        mid_o = (class_box.get(obj)[1] + class_box.get(obj)[1])/2
         if mid_p < mid_o:
             message = obj + ' is to your left'
         else:
             message = obj + ' is to your right'
+        print message
 
     # Visualization of the results of a detection.
     vis_util.visualize_boxes_and_labels_on_image_array(
@@ -95,7 +87,7 @@ def detect_objects(image_np, sess, detection_graph, obj):
         category_index,
         use_normalized_coordinates=True,
         line_thickness=8)
-    return image_np, new_boxes, new_classes, message
+    return image_np, message
 
 
 def worker(input_q, output_q, found, obj):
@@ -115,7 +107,7 @@ def worker(input_q, output_q, found, obj):
         fps.update()
         frame = input_q.get()
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image, boxes, classes, mes = detect_objects(frame_rgb, sess, detection_graph, obj)
+        image, mes = detect_objects(frame_rgb, sess, detection_graph, obj)
         if mes:
             p = cmdLineTTS
             p.say(mes)
