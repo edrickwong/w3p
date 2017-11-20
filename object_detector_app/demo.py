@@ -53,19 +53,19 @@ def detect_objects(image_np, sess, detection_graph, obj):
     found = False
     # Only show boxes around these classes
     allowed_classes = ['person','bottle','knife','spoon','fork','cup','bowl','dog']
+
     for i in range(len(scores[0])):
         if category_index[classes[0][i]]['name'] not in allowed_classes:
             scores[0][i] = 0
         if category_index[classes[0][i]]['name'] == 'person' and scores[0][i] > 0.5:
- 
             class_box['person'] = np.squeeze(boxes[0][i])
         if category_index[classes[0][i]]['name'] == obj and scores[0][i] > 0.5:
-               class_box[obj] = np.squeeze(boxes[0][i])
+            class_box[obj] = np.squeeze(boxes[0][i])
 
 
-    if 'person' in class_box.keys() and obj in class_box.keys():
+    if 'person' in class_box and obj in class_box:
         found = True
-    
+
     message = ''
 
     if found:
