@@ -41,7 +41,7 @@ TCP_IP = '127.0.0.1'
 TCP_PORT = 1315
 BUFFER_SIZE = 1024
 
-def detect_objects(image_np, sess, detection_graph, obj):
+def detect_objects(image_np, sess, detection_graph):
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
     image_np_expanded = np.expand_dims(image_np, axis=0)
     image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
