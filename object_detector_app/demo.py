@@ -8,7 +8,7 @@ import socket
 import tensorflow as tf
 
 from utils.app_utils import FPS, WebcamVideoStream
-from multiprocessing import Queue, Pool
+from multiprocessing import Queue, Pool, Process
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 from tts import PythonTTS, cmdLineTTS
@@ -84,7 +84,7 @@ def detect_objects(image_np, sess, detection_graph, obj):
     return image_np, class_box
 
 
-def worker(input_q, output_q):
+def worker(input_q, output_q, request_q):
     # Load a (frozen) Tensorflow model into memory.
     detection_graph = tf.Graph()
     with detection_graph.as_default():
@@ -96,20 +96,6 @@ def worker(input_q, output_q):
 
         sess = tf.Session(graph=detection_graph)
 
-    current_proc = multiprocessing.current_process()
-    cur_id = current_proc._identity[0]
-    if cur_id == 1:
-        # create socket conn to mock out alexa
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind((TCP_IP, TCP_PORT))
-        s.listen(1)
-        conn = None
-
-        while not conn:
-            conn, addr = s.accept()
-            print 'Waiting on mock connection from Alexa'
-            time.sleep(1)
-
     image = ''
     mes = ''
     fps = FPS().start()
@@ -120,38 +106,57 @@ def worker(input_q, output_q):
         frame = input_q.get()
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image, objects = detect_objects(frame_rgb, sess, detection_graph)
-        if cur_id == 1:
-            # listen on socket for incoming messages
-            request_data = conn.recv(BUFFER_SIZE)
-            if requeset_data:
-                # parse the incoming message
-                for words in request_data:
-                    if word in allowed_classes:
-                        obj = word
-                        break
+        # dont block if nothing is there
+        try:
+            obj = request_q.get()
+        except Queue.Empty:
+            obj = None
 
-                # try to build output message from objects
-                if 'person' not in objects:
-                    msg = 'Cannot locate user.'
-                elif obj not in objects:
-                    msg = 'Unable to locate %s in current view' %(obj)
+        if obj:
+            # try to build output message from objects
+            if 'person' not in objects:
+                msg = 'Cannot locate user.'
+            elif obj not in objects:
+                msg = 'Unable to locate %s in current view' %(obj)
+            else:
+                mid_p = (class_box.get('person')[1] \
+                            + class_box.get('person')[3])/2
+                mid_o = (class_box.get(obj)[1] \
+                        + class_box.get(obj)[1])/2
+                if mid_p < mid_o:
+                    msg = obj + ' is to your left'
                 else:
-                    mid_p = (class_box.get('person')[1] \
-                                + class_box.get('person')[3])/2
-                    mid_o = (class_box.get(obj)[1] \
-                            + class_box.get(obj)[1])/2
-                    if mid_p < mid_o:
-                        msg = obj + ' is to your left'
-                    else:
-                        msg = obj + ' is to your right'
-
-                out.say(msg)
+                    msg = obj + ' is to your right'
+            print msg
+            out.say(msg)
 
         output_q.put(image)
 
     fps.stop()
     sess.close()
 
+def request_worker(request_q):
+    # create socket conn to mock out alexa
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((TCP_IP, TCP_PORT))
+    s.listen(1)
+    conn = None
+
+    while not conn:
+        conn, addr = s.accept()
+        print 'Waiting on mock connection from Alexa'
+        time.sleep(1)
+
+    # listen on socket for incoming messages
+    request_data = conn.recv(BUFFER_SIZE)
+
+    # parse the incoming message
+    for words in request_data:
+        if word in allowed_classes:
+            obj = word
+            break
+
+    request_q.put(word)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -174,8 +179,10 @@ if __name__ == '__main__':
 
     input_q = Queue(maxsize=args.queue_size)
     output_q = Queue(maxsize=args.queue_size)
-    #found = Queue(maxsize=args.queue_size)
-    pool = Pool(args.num_workers, worker, (input_q, output_q))
+    request_q = Queue(maxsize=args.queue_size)
+    pool = Pool(args.num_workers, worker, (input_q, output_q, request_q))
+    request_p = Process(target=request_worker, args=(request_q,))
+    request_p.start()
 
     video_capture = WebcamVideoStream(src=args.video_source,
                                       width=args.width,
@@ -201,6 +208,7 @@ if __name__ == '__main__':
     print('[INFO] elapsed time (total): {:.2f}'.format(fps.elapsed()))
     print('[INFO] approx. FPS: {:.2f}'.format(fps.fps()))
 
+    request_p.join()
     pool.terminate()
     video_capture.stop()
     while True:
