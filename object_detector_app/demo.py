@@ -31,6 +31,40 @@ category_index = label_map_util.create_category_index(categories)
 
 allowed_classes = ['person','bottle','knife','spoon','fork','cup','bowl','dog']
 
+def detect_objectsv1(image_np, sess, detection_graph):
+    # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
+    image_np_expanded = np.expand_dims(image_np, axis=0)
+    image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
+
+    # Each box represents a part of the image where a particular object was detected.
+    boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
+
+    # Each score represent how level of confidence for each of the objects.
+    # Score is shown on the result image, together with the class label.
+    scores = detection_graph.get_tensor_by_name('detection_scores:0')
+    classes = detection_graph.get_tensor_by_name('detection_classes:0')
+    num_detections = detection_graph.get_tensor_by_name('num_detections:0')
+
+    # Actual detection.
+    (boxes, scores, classes, num_detections) = sess.run(
+        [boxes, scores, classes, num_detections],
+        feed_dict={image_tensor: image_np_expanded})
+
+    for i in range(len(scores[0])):
+        if category_index[classes[0][i]]['name'] not in allowed_classes:
+            scores[0][i] = 0
+
+    # Visualization of the results of a detection.
+    vis_util.visualize_boxes_and_labels_on_image_array(
+        image_np,
+        np.squeeze(boxes),
+        np.squeeze(classes).astype(np.int32),
+        np.squeeze(scores),
+        category_index,
+        use_normalized_coordinates=True,
+        line_thickness=8)
+    return image_np
+
 def detect_objects(image_np, sess, detection_graph, obj):
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
     image_np_expanded = np.expand_dims(image_np, axis=0)
@@ -62,7 +96,6 @@ def detect_objects(image_np, sess, detection_graph, obj):
         if category_index[classes[0][i]]['name'] == obj and scores[0][i] > 0.5:
             class_box[obj] = np.squeeze(boxes[0][i])
 
-
     if 'person' in class_box and obj in class_box:
         found = True
 
@@ -76,7 +109,6 @@ def detect_objects(image_np, sess, detection_graph, obj):
             message = obj + ' is to your left'
         else:
             message = obj + ' is to your right'
-        print message
 
     # Visualization of the results of a detection.
     vis_util.visualize_boxes_and_labels_on_image_array(
@@ -102,16 +134,30 @@ def worker(input_q, output_q, found, obj):
 
         sess = tf.Session(graph=detection_graph)
 
+    image = ''
+    mes = ''
     fps = FPS().start()
     while True:
         fps.update()
         frame = input_q.get()
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image, mes = detect_objects(frame_rgb, sess, detection_graph, obj)
-        if found.get() is '' and mes is not '':
+
+        if found.empty():
+            image, mes = detect_objects(frame_rgb, sess, detection_graph, obj)
+        else:
+            if found.get():
+                print 'v1'
+                image = detect_objectsv1(frame_rgb, sess, detection_graph)
+                mes = 'go'
+            else:
+                print 'v2'
+                image, mes = detect_objects(frame_rgb, sess, detection_graph, obj)
+        if mes is not 'go' or not mes:
             p = cmdLineTTS
             p.say(mes)
-            found.put(mes)
+        
+        found.put(mes)
+
         output_q.put(image)
 
     fps.stop()
@@ -140,7 +186,6 @@ if __name__ == '__main__':
     input_q = Queue(maxsize=args.queue_size)
     output_q = Queue(maxsize=args.queue_size)
     found = Queue(maxsize=args.queue_size)
-    found.put('')
     pool = Pool(args.num_workers, worker, (input_q, output_q, found, args.object))
 
     video_capture = WebcamVideoStream(src=args.video_source,
@@ -162,8 +207,6 @@ if __name__ == '__main__':
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-        #if found.get():
-            #break
 
     fps.stop()
     print('[INFO] elapsed time (total): {:.2f}'.format(fps.elapsed()))

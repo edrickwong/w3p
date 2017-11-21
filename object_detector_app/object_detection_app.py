@@ -45,14 +45,14 @@ def detect_objects(image_np, sess, detection_graph):
     classes = detection_graph.get_tensor_by_name('detection_classes:0')
     num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 
-    for i in range(len(scores[0])):
-        if category_index[classes[0][i]]['name'] not in allowed_classes:
-            scores[0][i] = 0
-
     # Actual detection.
     (boxes, scores, classes, num_detections) = sess.run(
         [boxes, scores, classes, num_detections],
         feed_dict={image_tensor: image_np_expanded})
+
+    for i in range(len(scores[0])):
+        if category_index[classes[0][i]]['name'] not in allowed_classes:
+            scores[0][i] = 0
 
     # Visualization of the results of a detection.
     vis_util.visualize_boxes_and_labels_on_image_array(
@@ -64,7 +64,6 @@ def detect_objects(image_np, sess, detection_graph):
         use_normalized_coordinates=True,
         line_thickness=8)
     return image_np
-
 
 def worker(input_q, output_q):
     # Load a (frozen) Tensorflow model into memory.
