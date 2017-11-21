@@ -96,7 +96,9 @@ def worker(input_q, output_q):
 
         sess = tf.Session(graph=detection_graph)
 
-    if multiprocessing.current_process() == 1:
+    current_proc = multiprocessing.current_process()
+    cur_id = current_proc._identity[0]
+    if cur_id == 1:
         # create socket conn to mock out alexa
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((TCP_IP, TCP_PORT))
@@ -118,7 +120,7 @@ def worker(input_q, output_q):
         frame = input_q.get()
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image, objects = detect_objects(frame_rgb, sess, detection_graph)
-        if multiprocessing.current_process() == 1:
+        if cur_id == 1:
             # listen on socket for incoming messages
             request_data = conn.recv(BUFFER_SIZE)
             if requeset_data:
