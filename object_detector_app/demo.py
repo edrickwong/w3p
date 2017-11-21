@@ -4,6 +4,7 @@ import time
 import argparse
 import multiprocessing
 import numpy as np
+import socket
 import tensorflow as tf
 
 from utils.app_utils import FPS, WebcamVideoStream
@@ -29,41 +30,16 @@ categories = label_map_util.convert_label_map_to_categories(label_map, max_num_c
                                                             use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
+# Kitchen items
 allowed_classes = ['person','bottle','knife','spoon','fork','cup','bowl','dog']
 
-def detect_objectsv1(image_np, sess, detection_graph):
-    # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-    image_np_expanded = np.expand_dims(image_np, axis=0)
-    image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
+# Detect Threshold
+DETECT_THRESHOLD = 0.5
 
-    # Each box represents a part of the image where a particular object was detected.
-    boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
-
-    # Each score represent how level of confidence for each of the objects.
-    # Score is shown on the result image, together with the class label.
-    scores = detection_graph.get_tensor_by_name('detection_scores:0')
-    classes = detection_graph.get_tensor_by_name('detection_classes:0')
-    num_detections = detection_graph.get_tensor_by_name('num_detections:0')
-
-    # Actual detection.
-    (boxes, scores, classes, num_detections) = sess.run(
-        [boxes, scores, classes, num_detections],
-        feed_dict={image_tensor: image_np_expanded})
-
-    for i in range(len(scores[0])):
-        if category_index[classes[0][i]]['name'] not in allowed_classes:
-            scores[0][i] = 0
-
-    # Visualization of the results of a detection.
-    vis_util.visualize_boxes_and_labels_on_image_array(
-        image_np,
-        np.squeeze(boxes),
-        np.squeeze(classes).astype(np.int32),
-        np.squeeze(scores),
-        category_index,
-        use_normalized_coordinates=True,
-        line_thickness=8)
-    return image_np
+# socket globals
+TCP_IP = '127.0.0.1'
+TCP_PORT = 1315
+BUFFER_SIZE = 1024
 
 def detect_objects(image_np, sess, detection_graph, obj):
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
@@ -85,30 +61,16 @@ def detect_objects(image_np, sess, detection_graph, obj):
         feed_dict={image_tensor: image_np_expanded})
     # Wanted objects
     class_box = {}
-    found = False
-    # Only show boxes around these classes
 
+    # Only show boxes around these classes
     for i in range(len(scores[0])):
         if category_index[classes[0][i]]['name'] not in allowed_classes:
             scores[0][i] = 0
-        if category_index[classes[0][i]]['name'] == 'person' and scores[0][i] > 0.5:
-            class_box['person'] = np.squeeze(boxes[0][i])
-        if category_index[classes[0][i]]['name'] == obj and scores[0][i] > 0.5:
-            class_box[obj] = np.squeeze(boxes[0][i])
-
-    if 'person' in class_box and obj in class_box:
-        found = True
-
-    message = ''
-
-    if found:
-        # do stuff here that calculates orientation of bottle to person
-        mid_p = (class_box.get('person')[1] + class_box.get('person')[3])/2
-        mid_o = (class_box.get(obj)[1] + class_box.get(obj)[1])/2
-        if mid_p < mid_o:
-            message = obj + ' is to your left'
         else:
-            message = obj + ' is to your right'
+            if scores[0][i] >= DETECT_THRESHOLD:
+                obj = category_index[classes[0][i]]['name']
+                class_box[obj] = np.squeeze(boxes[0][i])
+
 
     # Visualization of the results of a detection.
     vis_util.visualize_boxes_and_labels_on_image_array(
@@ -119,10 +81,10 @@ def detect_objects(image_np, sess, detection_graph, obj):
         category_index,
         use_normalized_coordinates=True,
         line_thickness=8)
-    return image_np, message
+    return image_np, class_box
 
 
-def worker(input_q, output_q, found, obj):
+def worker(input_q, output_q):
     # Load a (frozen) Tensorflow model into memory.
     detection_graph = tf.Graph()
     with detection_graph.as_default():
@@ -134,29 +96,54 @@ def worker(input_q, output_q, found, obj):
 
         sess = tf.Session(graph=detection_graph)
 
+    if multiprocessing.current_process() == 1:
+        # create socket conn to mock out alexa
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind((TCP_IP, TCP_PORT))
+        s.listen(1)
+        conn = None
+
+        while not conn:
+            conn, addr = s.accept()
+            print 'Waiting on mock connection from Alexa'
+            time.sleep(1)
+
     image = ''
     mes = ''
     fps = FPS().start()
+    out = cmdLineTTS
+
     while True:
         fps.update()
         frame = input_q.get()
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        image, objects = detect_objects(frame_rgb, sess, detection_graph)
+        if multiprocessing.current_process() == 1:
+            # listen on socket for incoming messages
+            request_data = conn.recv(BUFFER_SIZE)
+            if requeset_data:
+                # parse the incoming message
+                for words in request_data:
+                    if word in allowed_classes:
+                        obj = word
+                        break
 
-        if found.empty():
-            image, mes = detect_objects(frame_rgb, sess, detection_graph, obj)
-        else:
-            if found.get():
-                print 'v1'
-                image = detect_objectsv1(frame_rgb, sess, detection_graph)
-                mes = 'go'
-            else:
-                print 'v2'
-                image, mes = detect_objects(frame_rgb, sess, detection_graph, obj)
-        if mes is not 'go' or not mes:
-            p = cmdLineTTS
-            p.say(mes)
-        
-        found.put(mes)
+                # try to build output message from objects
+                if 'person' not in objects:
+                    msg = 'Cannot locate user.'
+                elif obj not in objects:
+                    msg = 'Unable to locate %s in current view' %(obj)
+                else:
+                    mid_p = (class_box.get('person')[1] \
+                                + class_box.get('person')[3])/2
+                    mid_o = (class_box.get(obj)[1] \
+                            + class_box.get(obj)[1])/2
+                    if mid_p < mid_o:
+                        msg = obj + ' is to your left'
+                    else:
+                        msg = obj + ' is to your right'
+
+                out.say(msg)
 
         output_q.put(image)
 
@@ -185,8 +172,8 @@ if __name__ == '__main__':
 
     input_q = Queue(maxsize=args.queue_size)
     output_q = Queue(maxsize=args.queue_size)
-    found = Queue(maxsize=args.queue_size)
-    pool = Pool(args.num_workers, worker, (input_q, output_q, found, args.object))
+    #found = Queue(maxsize=args.queue_size)
+    pool = Pool(args.num_workers, worker, (input_q, output_q))
 
     video_capture = WebcamVideoStream(src=args.video_source,
                                       width=args.width,
