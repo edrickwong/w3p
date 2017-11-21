@@ -28,6 +28,8 @@ categories = label_map_util.convert_label_map_to_categories(label_map, max_num_c
                                                             use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
+allowed_classes = ['person','bottle','knife','spoon','fork','cup','bowl','dog']
+
 
 def detect_objects(image_np, sess, detection_graph):
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
@@ -42,6 +44,10 @@ def detect_objects(image_np, sess, detection_graph):
     scores = detection_graph.get_tensor_by_name('detection_scores:0')
     classes = detection_graph.get_tensor_by_name('detection_classes:0')
     num_detections = detection_graph.get_tensor_by_name('num_detections:0')
+
+    for i in range(len(scores[0])):
+        if category_index[classes[0][i]]['name'] not in allowed_classes:
+            scores[0][i] = 0
 
     # Actual detection.
     (boxes, scores, classes, num_detections) = sess.run(

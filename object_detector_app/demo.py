@@ -29,6 +29,7 @@ categories = label_map_util.convert_label_map_to_categories(label_map, max_num_c
                                                             use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
+allowed_classes = ['person','bottle','knife','spoon','fork','cup','bowl','dog']
 
 def detect_objects(image_np, sess, detection_graph, obj):
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
@@ -52,7 +53,6 @@ def detect_objects(image_np, sess, detection_graph, obj):
     class_box = {}
     found = False
     # Only show boxes around these classes
-    allowed_classes = ['person','bottle','knife','spoon','fork','cup','bowl','dog']
 
     for i in range(len(scores[0])):
         if category_index[classes[0][i]]['name'] not in allowed_classes:
@@ -108,11 +108,11 @@ def worker(input_q, output_q, found, obj):
         frame = input_q.get()
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image, mes = detect_objects(frame_rgb, sess, detection_graph, obj)
-        if mes:
+        if found.get() is '' and mes is not '':
             p = cmdLineTTS
             p.say(mes)
+            found.put(mes)
         output_q.put(image)
-        found.put(mes)
 
     fps.stop()
     sess.close()
@@ -140,6 +140,7 @@ if __name__ == '__main__':
     input_q = Queue(maxsize=args.queue_size)
     output_q = Queue(maxsize=args.queue_size)
     found = Queue(maxsize=args.queue_size)
+    found.put('')
     pool = Pool(args.num_workers, worker, (input_q, output_q, found, args.object))
 
     video_capture = WebcamVideoStream(src=args.video_source,
@@ -161,8 +162,8 @@ if __name__ == '__main__':
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-        if found.get():
-            break
+        #if found.get():
+            #break
 
     fps.stop()
     print('[INFO] elapsed time (total): {:.2f}'.format(fps.elapsed()))
