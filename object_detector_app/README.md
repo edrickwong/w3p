@@ -1,8 +1,11 @@
 # Real-Time Object Detector 
 ## To run
-1. `python demo.py --object <object being asked>`
-2. When object and person is found, the program will say where the object is
-3. To close the window, press `q`
+* This is assuming all dependencies are met
+1. First run `python demo.py` in one window
+2. After the demo is running, in another window run `python alexa_mock_client.py`
+3. Type in the object that you want in alexa_mock_client
+3. When finished, to close the demo.py window, press `q`
+4. To exit mock client, ctrl-c 
 
 # Object-Detector-App
 

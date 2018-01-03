@@ -34,7 +34,7 @@ category_index = label_map_util.create_category_index(categories)
 allowed_classes = ['person','bottle','knife','spoon','fork','cup','bowl','dog']
 
 # Detect Threshold
-DETECT_THRESHOLD = 0.5
+DETECT_THRESHOLD = 0.3
 
 # socket globals
 TCP_IP = '127.0.0.1'
@@ -61,7 +61,7 @@ def detect_objects(image_np, sess, detection_graph):
         feed_dict={image_tensor: image_np_expanded})
     # Wanted objects
     class_box = {}
-
+    max_width = 0
     # Only show boxes around these classes
     for i in range(len(scores[0])):
         if category_index[classes[0][i]]['name'] not in allowed_classes:
@@ -69,8 +69,13 @@ def detect_objects(image_np, sess, detection_graph):
         else:
             if scores[0][i] >= DETECT_THRESHOLD:
                 obj = category_index[classes[0][i]]['name']
+                if obj == 'person':
+                    box = np.squeeze(boxes[0][i])
+                    width = abs(box[3] - box[1])
+                    if width < max_width:
+                        continue
+                    max_width = width
                 class_box[obj] = np.squeeze(boxes[0][i])
-
 
     # Visualization of the results of a detection.
     vis_util.visualize_boxes_and_labels_on_image_array(
@@ -80,7 +85,8 @@ def detect_objects(image_np, sess, detection_graph):
         np.squeeze(scores),
         category_index,
         use_normalized_coordinates=True,
-        line_thickness=8)
+        line_thickness=8,
+        min_score_thresh=DETECT_THRESHOLD)
     return image_np, class_box
 
 
@@ -100,6 +106,7 @@ def worker(input_q, output_q, request_q):
     mes = ''
     fps = FPS().start()
     out = cmdLineTTS
+    print 'worker'
 
     while True:
         fps.update()
@@ -108,8 +115,8 @@ def worker(input_q, output_q, request_q):
         image, objects = detect_objects(frame_rgb, sess, detection_graph)
         # dont block if nothing is there
         try:
-            obj = request_q.get()
-        except Queue.Empty:
+            obj = request_q.get(block=False)
+        except:
             obj = None
 
         if obj:
@@ -119,10 +126,10 @@ def worker(input_q, output_q, request_q):
             elif obj not in objects:
                 msg = 'Unable to locate %s in current view' %(obj)
             else:
-                mid_p = (class_box.get('person')[1] \
-                            + class_box.get('person')[3])/2
-                mid_o = (class_box.get(obj)[1] \
-                        + class_box.get(obj)[1])/2
+                mid_p = (objects.get('person')[1] \
+                            + objects.get('person')[3])/2
+                mid_o = (objects.get(obj)[1] \
+                        + objects.get(obj)[1])/2
                 if mid_p < mid_o:
                     msg = obj + ' is to your left'
                 else:
@@ -147,16 +154,21 @@ def request_worker(request_q):
         print 'Waiting on mock connection from Alexa'
         time.sleep(1)
 
-    # listen on socket for incoming messages
-    request_data = conn.recv(BUFFER_SIZE)
+    while True:
+        # listen on socket for incoming messages
+        request_data = conn.recv(BUFFER_SIZE)
 
-    # parse the incoming message
-    for words in request_data:
-        if word in allowed_classes:
-            obj = word
-            break
+        print request_data
+        obj = None 
+        # parse the incoming message
+        for word in request_data.split():
+            if word in allowed_classes:
+                obj = word
+                break
 
-    request_q.put(word)
+        if obj:
+            request_q.put(obj)
+            print obj
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -167,7 +179,7 @@ if __name__ == '__main__':
     parser.add_argument('-ht', '--height', dest='height', type=int,
                         default=360, help='Height of the frames in the video stream.')
     parser.add_argument('-num-w', '--num-workers', dest='num_workers', type=int,
-                        default=2, help='Number of workers.')
+                        default=3, help='Number of workers.')
     parser.add_argument('-q-size', '--queue-size', dest='queue_size', type=int,
                         default=5, help='Size of the queue.')
     parser.add_argument('-obj','--object', dest='object', type=str,
