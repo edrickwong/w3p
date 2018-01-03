@@ -13,7 +13,7 @@ YOLO_TYPE = 'yolo'
 def main():
     base_cmd = "cd ~/darknet && ./darknet detector test cfg/voc.data cfg/tiny-yolo-voc.cfg tiny-yolo-voc.weights"
     yd = YoloDarknet(YOLO_TYPE, base_cmd)
-    yd.run()
+    yd.run(iterations=100)
     yd.print_summary()
 
 if __name__ == "__main__":
