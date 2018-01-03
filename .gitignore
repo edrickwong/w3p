@@ -1,6 +1,3 @@
-# this file itself #
-.gitignore
-
 # Compiled sources #
 ####################
 *.pyc
