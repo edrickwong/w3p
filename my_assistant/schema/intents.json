@@ -1,0 +1,262 @@
+[
+    {
+        "templates": [], 
+        "fallbackIntent": false, 
+        "responses": [
+            {
+                "action": "ask_for_color", 
+                "resetContexts": false, 
+                "affectedContexts": [], 
+                "messages": [], 
+                "parameters": [
+                    {
+                        "name": "gender", 
+                        "dataType": "@gender", 
+                        "defaultValue": "", 
+                        "required": true, 
+                        "value": "$gender", 
+                        "prompts": [], 
+                        "isList": false
+                    }
+                ]
+            }
+        ], 
+        "contexts": [], 
+        "auto": true, 
+        "id": "9d113418-0a5c-410b-a601-ff3ee89281d7", 
+        "priority": 500000, 
+        "userSays": [
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "male", 
+                        "meta": "@gender", 
+                        "userDefined": true, 
+                        "alias": "gender"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "Im a "
+                    }, 
+                    {
+                        "text": "female", 
+                        "meta": "@gender", 
+                        "userDefined": true, 
+                        "alias": "gender"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "girl", 
+                        "meta": "@gender", 
+                        "userDefined": true, 
+                        "alias": "gender"
+                    }
+                ]
+            }
+        ], 
+        "webhookUsed": true, 
+        "webhookForSlotFilling": true, 
+        "events": [], 
+        "name": "user-gender"
+    }, 
+    {
+        "templates": [], 
+        "fallbackIntent": false, 
+        "responses": [
+            {
+                "action": "greet_and_start", 
+                "resetContexts": false, 
+                "affectedContexts": [], 
+                "messages": [], 
+                "parameters": []
+            }
+        ], 
+        "contexts": [], 
+        "auto": true, 
+        "id": "1023a157-c0dc-4662-b8d5-8f3194e8ad44", 
+        "priority": 500000, 
+        "userSays": [
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "hi", 
+                        "userDefined": false
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "hello", 
+                        "userDefined": false
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "start", 
+                        "userDefined": false
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "begin", 
+                        "userDefined": false
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "launch", 
+                        "userDefined": false
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "yo", 
+                        "userDefined": false
+                    }
+                ]
+            }
+        ], 
+        "webhookUsed": true, 
+        "webhookForSlotFilling": true, 
+        "events": [], 
+        "name": "greeting"
+    }, 
+    {
+        "templates": [], 
+        "fallbackIntent": false, 
+        "responses": [
+            {
+                "action": "ask_for_season", 
+                "resetContexts": false, 
+                "affectedContexts": [], 
+                "messages": [], 
+                "parameters": [
+                    {
+                        "name": "color", 
+                        "dataType": "@sys.color", 
+                        "defaultValue": "", 
+                        "required": true, 
+                        "value": "$color", 
+                        "prompts": [], 
+                        "isList": false
+                    }
+                ]
+            }
+        ], 
+        "contexts": [], 
+        "auto": true, 
+        "id": "19a4b16a-85d4-446e-8cff-3903d5fc0419", 
+        "priority": 500000, 
+        "userSays": [
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "my color is "
+                    }, 
+                    {
+                        "text": "blue", 
+                        "meta": "@sys.color", 
+                        "userDefined": true, 
+                        "alias": "color"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "Its "
+                    }, 
+                    {
+                        "text": "blue", 
+                        "meta": "@sys.color", 
+                        "userDefined": true, 
+                        "alias": "color"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "I like "
+                    }, 
+                    {
+                        "text": "red", 
+                        "meta": "@sys.color", 
+                        "userDefined": true, 
+                        "alias": "color"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "My favorite color is "
+                    }, 
+                    {
+                        "text": "red", 
+                        "meta": "@sys.color", 
+                        "userDefined": true, 
+                        "alias": "color"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "blue", 
+                        "meta": "@sys.color", 
+                        "userDefined": true, 
+                        "alias": "color"
+                    }
+                ]
+            }
+        ], 
+        "webhookUsed": true, 
+        "webhookForSlotFilling": true, 
+        "events": [], 
+        "name": "user-color"
+    }
+]
