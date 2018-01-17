@@ -1,3 +1,12 @@
+# Real-Time Object Detector 
+## To run
+* This is assuming all dependencies are met
+1. First run `python demo.py` in one window
+2. After the demo is running, in another window run `python alexa_mock_client.py`
+3. Type in the object that you want in alexa_mock_client
+3. When finished, to close the demo.py window, press `q`
+4. To exit mock client, ctrl-c 
+
 # Object-Detector-App
 
 A real-time object recognition application using [Google's TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection) and [OpenCV](http://opencv.org/).
