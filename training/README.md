@@ -1,0 +1,61 @@
+# Training
+
+## Dependencies
+
+Install Tensorflow for python2.7 
+
+``` bash
+# For CPU
+pip install tensorflow
+# For GPU (nvidia)
+pip install tensorflow-gpu
+```
+For more detailed instructions, you can follow [Tensorflow installation
+instructions](https://www.tensorflow.org/install/).
+
+You also have to have Tensorflow models, more info [here](https://github.com/tensorflow/models.git).
+
+``` bash
+git clone https://github.com/tensorflow/models.git
+```
+
+Once you have the models folder, follow these [installation instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md).
+
+## Training Setup
+
+In w3p/training/ssd_mobilenet_v1_coco.config change paths for:
+* Fine_tune_checkpoint
+* Train_input_reader
+* Eval_input_reader
+
+When running for the first time, make sure checkpoint, model.ckpt* and graph.pbtxt are not in the training folder.
+
+## Now you are ready to train
+
+In w3p/object_detector_app/object_detection, run
+
+``` bash
+python train.py \
+--logtostderr \
+--pipeline_config_path=[path_to_directory]/w3p/training/ssd_mobilenet_v1_coco.config \
+--train_dir=[path_to_directory]/w3p/training
+```
+
+During training, checkpoint, model.ckpt*, graph.pbtxt files will be created in the training directory.
+These do not need to be added to git.
+
+## File structure
+
+This is the file structure in w3p:
+
+- Training
+	- Pitcher
+	- ssd_mobilenet_v1_coco_2017_11_17/model.cpkt
+	- Train.record
+	- Test.record
+	- Ssd_mobilenet_v1_coco.config
+- Object_detector_app
+	- Object_detection
+		- Train.py
+		- Trainer.py
+
