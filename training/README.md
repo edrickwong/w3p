@@ -54,6 +54,12 @@ python eval.py \
 --pipeline_config_path=[path_to_directory]/w3p/training/ssd_mobilenet_v1_coco.config \
 ```
 
+To use tensorboard, run
+
+``` bash
+tensorboard --logdir=[path_to_directory]/w3p/training
+```
+
 ## File structure
 
 This is the file structure in w3p:
