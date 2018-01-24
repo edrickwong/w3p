@@ -44,6 +44,16 @@ python train.py \
 During training, checkpoint, model.ckpt*, graph.pbtxt files will be created in the training directory.
 These do not need to be added to git.
 
+To test the model along with training, run the following concurrently 
+
+``` bash
+python eval.py \
+--logtostderr \
+--checkpoint_dir=[path_to_directory]/w3p/training \
+--eval_dir=[path_to_directory]/w3p/training \
+--pipeline_config_path=[path_to_directory]/w3p/training/ssd_mobilenet_v1_coco.config \
+```
+
 ## File structure
 
 This is the file structure in w3p:
