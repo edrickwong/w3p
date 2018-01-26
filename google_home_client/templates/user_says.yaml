@@ -14,18 +14,8 @@
 #    - event1              # adds a triggerable event named 'event1' to the intent
 
 
-
-user-gender:
-  UserSays:
-  - male
-  - Im a female
-  - girl
-  Annotations:
-  - male: gender
-  - female: gender
-  - girl: gender
-  Events:
-  - 
+# right now, the only way to trigger the app is by saying "Hey Google, talk to my test app"
+# need to fix this so that we don't need to go through the extra dialog
 greeting:
   UserSays:
   - hi
@@ -35,19 +25,19 @@ greeting:
   - launch
   - yo
   Annotations:
-  - 
-  - 
+  -
+  -
   Events:
-  - 
-user-color:
+  -
+
+object-to-detect:
   UserSays:
-  - my color is blue
-  - Its blue
-  - I like red
-  - My favorite color is red
-  - blue
+  - where is the bottle
+  - i can't find my bottle
+  - i cannot find my bottle
+  - do you see my bottle
+  - can you help me find my bottle
   Annotations:
-  - blue: sys.color
-  - red: sys.color
+  - bottle: object
   Events:
-  - 
+  -

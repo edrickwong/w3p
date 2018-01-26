@@ -1,0 +1,17 @@
+[
+    {
+        "id": "3bb036ce-46a2-4faa-b8eb-179220f473fa", 
+        "isEnum": null, 
+        "name": "object", 
+        "entries": [
+            {
+                "synonyms": [
+                    "bottle", 
+                    "flask", 
+                    "pitcher"
+                ], 
+                "value": "bottle"
+            }
+        ]
+    }
+]

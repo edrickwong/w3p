@@ -4,78 +4,6 @@
         "fallbackIntent": false, 
         "responses": [
             {
-                "action": "ask_for_color", 
-                "resetContexts": false, 
-                "affectedContexts": [], 
-                "messages": [], 
-                "parameters": [
-                    {
-                        "name": "gender", 
-                        "dataType": "@gender", 
-                        "defaultValue": "", 
-                        "required": true, 
-                        "value": "$gender", 
-                        "prompts": [], 
-                        "isList": false
-                    }
-                ]
-            }
-        ], 
-        "contexts": [], 
-        "auto": true, 
-        "id": "9d113418-0a5c-410b-a601-ff3ee89281d7", 
-        "priority": 500000, 
-        "userSays": [
-            {
-                "count": 0, 
-                "isTemplate": false, 
-                "data": [
-                    {
-                        "text": "male", 
-                        "meta": "@gender", 
-                        "userDefined": true, 
-                        "alias": "gender"
-                    }
-                ]
-            }, 
-            {
-                "count": 0, 
-                "isTemplate": false, 
-                "data": [
-                    {
-                        "text": "Im a "
-                    }, 
-                    {
-                        "text": "female", 
-                        "meta": "@gender", 
-                        "userDefined": true, 
-                        "alias": "gender"
-                    }
-                ]
-            }, 
-            {
-                "count": 0, 
-                "isTemplate": false, 
-                "data": [
-                    {
-                        "text": "girl", 
-                        "meta": "@gender", 
-                        "userDefined": true, 
-                        "alias": "gender"
-                    }
-                ]
-            }
-        ], 
-        "webhookUsed": true, 
-        "webhookForSlotFilling": true, 
-        "events": [], 
-        "name": "user-gender"
-    }, 
-    {
-        "templates": [], 
-        "fallbackIntent": false, 
-        "responses": [
-            {
                 "action": "greet_and_start", 
                 "resetContexts": false, 
                 "affectedContexts": [], 
@@ -159,17 +87,17 @@
         "fallbackIntent": false, 
         "responses": [
             {
-                "action": "ask_for_season", 
+                "action": "detect_object", 
                 "resetContexts": false, 
                 "affectedContexts": [], 
                 "messages": [], 
                 "parameters": [
                     {
-                        "name": "color", 
-                        "dataType": "@sys.color", 
+                        "name": "object", 
+                        "dataType": "@object", 
                         "defaultValue": "", 
                         "required": true, 
-                        "value": "$color", 
+                        "value": "$object", 
                         "prompts": [], 
                         "isList": false
                     }
@@ -178,7 +106,7 @@
         ], 
         "contexts": [], 
         "auto": true, 
-        "id": "19a4b16a-85d4-446e-8cff-3903d5fc0419", 
+        "id": "7a8969ed-aab5-425e-bf64-6ba3288e902e", 
         "priority": 500000, 
         "userSays": [
             {
@@ -186,13 +114,13 @@
                 "isTemplate": false, 
                 "data": [
                     {
-                        "text": "my color is "
+                        "text": "where is the "
                     }, 
                     {
-                        "text": "blue", 
-                        "meta": "@sys.color", 
+                        "text": "bottle", 
+                        "meta": "@object", 
                         "userDefined": true, 
-                        "alias": "color"
+                        "alias": "object"
                     }
                 ]
             }, 
@@ -201,13 +129,13 @@
                 "isTemplate": false, 
                 "data": [
                     {
-                        "text": "Its "
+                        "text": "i can't find my "
                     }, 
                     {
-                        "text": "blue", 
-                        "meta": "@sys.color", 
+                        "text": "bottle", 
+                        "meta": "@object", 
                         "userDefined": true, 
-                        "alias": "color"
+                        "alias": "object"
                     }
                 ]
             }, 
@@ -216,13 +144,13 @@
                 "isTemplate": false, 
                 "data": [
                     {
-                        "text": "I like "
+                        "text": "i cannot find my "
                     }, 
                     {
-                        "text": "red", 
-                        "meta": "@sys.color", 
+                        "text": "bottle", 
+                        "meta": "@object", 
                         "userDefined": true, 
-                        "alias": "color"
+                        "alias": "object"
                     }
                 ]
             }, 
@@ -231,13 +159,13 @@
                 "isTemplate": false, 
                 "data": [
                     {
-                        "text": "My favorite color is "
+                        "text": "do you see my "
                     }, 
                     {
-                        "text": "red", 
-                        "meta": "@sys.color", 
+                        "text": "bottle", 
+                        "meta": "@object", 
                         "userDefined": true, 
-                        "alias": "color"
+                        "alias": "object"
                     }
                 ]
             }, 
@@ -246,10 +174,13 @@
                 "isTemplate": false, 
                 "data": [
                     {
-                        "text": "blue", 
-                        "meta": "@sys.color", 
+                        "text": "can you help me find my "
+                    }, 
+                    {
+                        "text": "bottle", 
+                        "meta": "@object", 
                         "userDefined": true, 
-                        "alias": "color"
+                        "alias": "object"
                     }
                 ]
             }
@@ -257,6 +188,6 @@
         "webhookUsed": true, 
         "webhookForSlotFilling": true, 
         "events": [], 
-        "name": "user-color"
+        "name": "object-to-detect"
     }
 ]
