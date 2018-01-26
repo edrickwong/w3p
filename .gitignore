@@ -28,4 +28,3 @@ training/graph.pbtxt
 training/checkpoint
 training/model.*
 training/events.*
-training/ssd_mobilenet_v1_coco.config
