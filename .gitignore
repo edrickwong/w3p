@@ -20,9 +20,11 @@ pids
 # Virtual envs
 venv/*
 
-<<<<<<< HEAD
-.idea/*
-=======
 .idea/*
 .DS_Store
->>>>>>> 2cf6d0e9df1b9843778209acf6d0e662c3b96bb0
+
+# training
+training/graph.pbtxt
+training/checkpoint
+training/model.*
+training/events.*

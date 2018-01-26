@@ -1,0 +1,43 @@
+# Template for defining UserSays examples
+
+# give-color-intent:
+
+#  UserSays:
+#    - My color is blue
+#    - red is my favorite color
+
+#  Annotations:
+#    - blue: sys.color     # maps param value -> entity
+#    - red: sys.color
+
+#  Events:
+#    - event1              # adds a triggerable event named 'event1' to the intent
+
+
+# right now, the only way to trigger the app is by saying "Hey Google, talk to my test app"
+# need to fix this so that we don't need to go through the extra dialog
+greeting:
+  UserSays:
+  - hi
+  - hello
+  - start
+  - begin
+  - launch
+  - yo
+  Annotations:
+  -
+  -
+  Events:
+  -
+
+object-to-detect:
+  UserSays:
+  - where is the bottle
+  - i can't find my bottle
+  - i cannot find my bottle
+  - do you see my bottle
+  - can you help me find my bottle
+  Annotations:
+  - bottle: object
+  Events:
+  -

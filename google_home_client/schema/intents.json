@@ -1,0 +1,193 @@
+[
+    {
+        "templates": [], 
+        "fallbackIntent": false, 
+        "responses": [
+            {
+                "action": "greet_and_start", 
+                "resetContexts": false, 
+                "affectedContexts": [], 
+                "messages": [], 
+                "parameters": []
+            }
+        ], 
+        "contexts": [], 
+        "auto": true, 
+        "id": "1023a157-c0dc-4662-b8d5-8f3194e8ad44", 
+        "priority": 500000, 
+        "userSays": [
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "hi", 
+                        "userDefined": false
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "hello", 
+                        "userDefined": false
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "start", 
+                        "userDefined": false
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "begin", 
+                        "userDefined": false
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "launch", 
+                        "userDefined": false
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "yo", 
+                        "userDefined": false
+                    }
+                ]
+            }
+        ], 
+        "webhookUsed": true, 
+        "webhookForSlotFilling": true, 
+        "events": [], 
+        "name": "greeting"
+    }, 
+    {
+        "templates": [], 
+        "fallbackIntent": false, 
+        "responses": [
+            {
+                "action": "detect_object", 
+                "resetContexts": false, 
+                "affectedContexts": [], 
+                "messages": [], 
+                "parameters": [
+                    {
+                        "name": "object", 
+                        "dataType": "@object", 
+                        "defaultValue": "", 
+                        "required": true, 
+                        "value": "$object", 
+                        "prompts": [], 
+                        "isList": false
+                    }
+                ]
+            }
+        ], 
+        "contexts": [], 
+        "auto": true, 
+        "id": "7a8969ed-aab5-425e-bf64-6ba3288e902e", 
+        "priority": 500000, 
+        "userSays": [
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "where is the "
+                    }, 
+                    {
+                        "text": "bottle", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "i can't find my "
+                    }, 
+                    {
+                        "text": "bottle", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "i cannot find my "
+                    }, 
+                    {
+                        "text": "bottle", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "do you see my "
+                    }, 
+                    {
+                        "text": "bottle", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "can you help me find my "
+                    }, 
+                    {
+                        "text": "bottle", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }
+        ], 
+        "webhookUsed": true, 
+        "webhookForSlotFilling": true, 
+        "events": [], 
+        "name": "object-to-detect"
+    }
+]
