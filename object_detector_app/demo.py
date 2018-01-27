@@ -159,7 +159,7 @@ def request_worker(request_q):
         request_data = conn.recv(BUFFER_SIZE)
 
         print request_data
-        obj = None 
+        obj = None
         # parse the incoming message
         for word in request_data.split():
             if word in allowed_classes:
