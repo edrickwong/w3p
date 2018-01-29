@@ -22,7 +22,9 @@ venv/*
 
 .idea/*
 .DS_Store
+
+# training
+training/graph.pbtxt
 training/checkpoint
-training/events.*
-training/graph.*
 training/model.*
+training/events.*

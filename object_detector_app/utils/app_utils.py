@@ -8,8 +8,7 @@ import datetime
 from threading import Thread
 from matplotlib import colors
 
-
-class FPS:
+class FPS(object):
     def __init__(self):
         # store the start time, end time, and total number of frames
         # that were examined between the start and end intervals
@@ -41,7 +40,7 @@ class FPS:
         return self._numFrames / self.elapsed()
 
 
-class WebcamVideoStream:
+class WebcamVideoStream(object):
     def __init__(self, src, width, height):
         # initialize the video camera stream and read the first frame
         # from the stream
