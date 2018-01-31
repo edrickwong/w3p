@@ -8,6 +8,7 @@ import socket
 import tensorflow as tf
 
 from utils.app_utils import FPS, WebcamVideoStream
+from utils.misc_utils import is_using_tensorflow_gpu
 from multiprocessing import Queue, Pool, Process
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
@@ -189,10 +190,16 @@ if __name__ == '__main__':
     logger = multiprocessing.log_to_stderr()
     logger.setLevel(multiprocessing.SUBDEBUG)
 
+    # override num workers if tensorflow gpu is being used
+    num_workers = args.num_workers
+    if is_using_tensorflow_gpu() and num_workers > 1:
+        print "Using GPU, not allowed to multiproc workers."
+        num_workers = 1
+
     input_q = Queue(maxsize=args.queue_size)
     output_q = Queue(maxsize=args.queue_size)
     request_q = Queue(maxsize=args.queue_size)
-    pool = Pool(args.num_workers, worker, (input_q, output_q, request_q))
+    pool = Pool(num_workers, worker, (input_q, output_q, request_q))
     request_p = Process(target=request_worker, args=(request_q,))
     request_p.start()
 
