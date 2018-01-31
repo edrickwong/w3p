@@ -39,3 +39,7 @@ pytest -vs utils/
 
 See [LICENSE](LICENSE) for details.
 Copyright (c) 2017 [Dat Tran](http://www.dat-tran.com/).
+
+## Commands
+- To kill all demo processes:
+	`ps aux | grep demo.py | grep -v grep | awk -F ' ' '{print $2}' | sort | head -1 | xargs kill -9`
