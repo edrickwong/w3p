@@ -106,13 +106,13 @@ def worker(input_q, output_q, request_q):
     mes = ''
     fps = FPS().start()
     out = cmdLineTTS
-    print 'worker'
 
     while True:
         fps.update()
         frame = input_q.get()
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image, objects = detect_objects(frame_rgb, sess, detection_graph)
+        print 'detect objects'
         # dont block if nothing is there
         try:
             obj = request_q.get(block=False)
@@ -179,7 +179,7 @@ if __name__ == '__main__':
     parser.add_argument('-ht', '--height', dest='height', type=int,
                         default=360, help='Height of the frames in the video stream.')
     parser.add_argument('-num-w', '--num-workers', dest='num_workers', type=int,
-                        default=3, help='Number of workers.')
+                        default=1, help='Number of workers.')
     parser.add_argument('-q-size', '--queue-size', dest='queue_size', type=int,
                         default=5, help='Size of the queue.')
     parser.add_argument('-obj','--object', dest='object', type=str,
