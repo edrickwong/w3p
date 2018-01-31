@@ -41,6 +41,18 @@ TCP_IP = '127.0.0.1'
 TCP_PORT = 1315
 BUFFER_SIZE = 1024
 
+# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# s.bind((TCP_IP, TCP_PORT))
+# s.listen(1)
+
+class SocketConnection():
+    def __init__(self, tcp_ip='127.0.0.1', tcp_port=1315):
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.bind((tcp_ip, tcp_port))
+        self.s.listen(1)
+        self.conn = None
+
+
 def detect_objects(image_np, sess, detection_graph):
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
     image_np_expanded = np.expand_dims(image_np, axis=0)
@@ -112,12 +124,14 @@ def worker(input_q, output_q, request_q):
         frame = input_q.get()
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image, objects = detect_objects(frame_rgb, sess, detection_graph)
-        print 'detect objects'
+        # print 'detect objects'
         # dont block if nothing is there
         try:
             obj = request_q.get(block=False)
         except:
             obj = None
+
+        res = {}
 
         if obj:
             # try to build output message from objects
@@ -134,29 +148,26 @@ def worker(input_q, output_q, request_q):
                     msg = obj + ' is to your left'
                 else:
                     msg = obj + ' is to your right'
-            print msg
-            out.say(msg)
-
-        output_q.put(image)
+            # print msg
+            # this needs to be the connection instance, not a socket instance
+            print 'worker here'
+            res['msg'] = msg
+        res['img'] = image
+        output_q.put(res)
 
     fps.stop()
     sess.close()
 
-def request_worker(request_q):
-    # create socket conn to mock out alexa
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((TCP_IP, TCP_PORT))
-    s.listen(1)
-    conn = None
-
-    while not conn:
-        conn, addr = s.accept()
+def request_worker(request_q, output_q, socket_connection):
+    while not socket_connection.conn:
+        socket_connection.conn, addr = socket_connection.s.accept()
         print 'Waiting on mock connection from Alexa'
         time.sleep(1)
 
     while True:
+        # print 'Hit from Google Home'
         # listen on socket for incoming messages
-        request_data = conn.recv(BUFFER_SIZE)
+        request_data = socket_connection.conn.recv(BUFFER_SIZE)
 
         print request_data
         obj = None
@@ -169,6 +180,11 @@ def request_worker(request_q):
         if obj:
             request_q.put(obj)
             print obj
+
+        msg = output_q.get().get('msg')
+        print(msg)
+        if msg:
+            socket_connection.conn.send(msg)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -189,11 +205,13 @@ if __name__ == '__main__':
     logger = multiprocessing.log_to_stderr()
     logger.setLevel(multiprocessing.SUBDEBUG)
 
+    socket_connection = SocketConnection(TCP_IP, TCP_PORT)
+
     input_q = Queue(maxsize=args.queue_size)
     output_q = Queue(maxsize=args.queue_size)
     request_q = Queue(maxsize=args.queue_size)
     pool = Pool(args.num_workers, worker, (input_q, output_q, request_q))
-    request_p = Process(target=request_worker, args=(request_q,))
+    request_p = Process(target=request_worker, args=(request_q, output_q, socket_connection,))
     request_p.start()
 
     video_capture = WebcamVideoStream(src=args.video_source,
@@ -206,12 +224,11 @@ if __name__ == '__main__':
         input_q.put(frame)
 
         t = time.time()
-
-        output_rgb = cv2.cvtColor(output_q.get(), cv2.COLOR_RGB2BGR)
+        output_rgb = cv2.cvtColor(output_q.get().get('img'), cv2.COLOR_RGB2BGR)
         cv2.imshow('Video', output_rgb)
         fps.update()
 
-        print('[INFO] elapsed time: {:.2f}'.format(time.time() - t))
+        # print('[INFO] elapsed time: {:.2f}'.format(time.time() - t))
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
