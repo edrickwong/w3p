@@ -25,7 +25,7 @@ class ImageContainer(object):
     def read_image(self):
         if not self.image:
             self.image = cv2.imread(self.file_name)
-            self.width, self.height = self.image.shape
+            self.height, self.width, _ = self.image.shape
 
     def get_flipped_image_horizontal(self):
         pass
@@ -46,7 +46,7 @@ class ImageContainer(object):
             return False
 
     @property
-    def file_name(self):
+    def file_name_short(self):
         return
 
 class ImageObject(object):
