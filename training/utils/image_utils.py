@@ -20,10 +20,12 @@ class ImageContainer(object):
         self.labelled_objects = []
 
     def read_image(self):
-        pass
+        if not self.image:
+            self.image = cv2.imread(self.file_name)
+            self.width, self.height = self.image.shape
 
-    def detect_objects(self):
-        pass
+    def detect_objects(self, model):
+        self.read_image()
 
     def get_flipped_image_horizontal(self):
         pass
