@@ -3,6 +3,7 @@
     and or vertical scale.
 '''
 import argparse
+from collections import defaultdict
 import os
 from utils.image_utils import ImageContainer, build_labelled_csv_dictionary
 
@@ -26,9 +27,11 @@ def main():
                         default=False, help='Flip Vertically.')
     args = parser.parse_args()
 
-    x = build_labelled_csv_dictionary(CSV_FILES[0])
+    csv_dict_test = build_labelled_csv_dictionary(CSV_FILES[0])
+    csv_dict_label = build_labelled_csv_dictionary(CSV_FILES[1])
 
-    import pdb ; pdb.set_trace()
+    for image in generate_images():
+        import pdb ; pdb.set_trace()
 
 if __name__ == "__main__":
     main()

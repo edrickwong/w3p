@@ -1,4 +1,4 @@
-#import cv2
+import cv2
 import csv
 from collections import defaultdict
 
@@ -45,6 +45,9 @@ class ImageContainer(object):
             # Just for data integrity sake here
             return False
 
+    @property
+    def file_name(self):
+        return
 
 class ImageObject(object):
     def __init__(self, obj_type, xmin, xmax, ymin, ymax):
