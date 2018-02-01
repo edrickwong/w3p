@@ -20,7 +20,7 @@ def generator_for_test_image(csv_dict):
     for f in os.listdir(IMAGES_FOLDER):
         if f in csv_dict:
             file_name = os.path.join(IMAGES_FOLDER, f)
-            img = ImageContainer(f)
+            img = ImageContainer(file_name)
             img.labelled_objects = csv_dict[f]
             yield img
 
