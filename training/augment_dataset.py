@@ -3,8 +3,9 @@
     and or vertical scale.
 '''
 import argparse
-from collections import defaultdict
+import cv2
 import os
+from collections import defaultdict
 from utils.image_utils import ImageContainer, build_labelled_csv_dictionary
 
 IMAGE = "pitcher"
@@ -13,7 +14,7 @@ IMAGES_FOLDER = os.path.join(TRAIN_FOLDER, IMAGE)
 CSV_FILES = [os.path.join(TRAIN_FOLDER, 'test_labels.csv'),
              os.path.join(TRAIN_FOLDER, 'train_labels.csv')]
 
-def generate_images():
+def generator_images():
     for f in os.listdir(IMAGES_FOLDER):
         full_file_name = os.path.join(IMAGES_FOLDER, f)
         if os.path.isfile(full_file_name):
@@ -22,16 +23,23 @@ def generate_images():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-hor', '--horizontal', dest='horizontal', type=bool,
-                        default=True, help='Flip Horizontally.')
     parser.add_argument('-ver', '--vertical', dest='vertical', type=bool,
                         default=False, help='Flip Vertically.')
     args = parser.parse_args()
 
-    csv_dict_test = build_labelled_csv_dictionary(CSV_FILES[0])
-    csv_dict_label = build_labelled_csv_dictionary(CSV_FILES[1])
+    FLIP_ARG = 1 if args.vertical else 0
 
-    for image in generate_images():
+    # build existing labels dict
+    csv_dict = {}
+    for f in CSV_FILES:
+        csv_dict.update(build_labelled_csv_dictionary(f))
+
+    for image in generator_images():
+        image.labelled_images = csv_dict[image.file_name_short]
+        new_image_name = image.file_name_short.split('.')[0] + 'f' + '.' + image.file_name_short.split('.')[1]
+        updated_image = ImageContainer(new_image_name, lazy_load=True)
+        updated_image.image = cv2.flip(image.image, FLIP_ARG)
+        updated_image.original = False
         import pdb ; pdb.set_trace()
 
 if __name__ == "__main__":

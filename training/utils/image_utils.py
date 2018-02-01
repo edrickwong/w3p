@@ -27,12 +27,6 @@ class ImageContainer(object):
             self.image = cv2.imread(self.file_name)
             self.height, self.width, _ = self.image.shape
 
-    def get_flipped_image_horizontal(self):
-        pass
-
-    def get_flipped_image_vertical(self):
-        pass
-
     def __str__(self):
         return self.file_name
 
@@ -47,10 +41,14 @@ class ImageContainer(object):
 
     @property
     def file_name_short(self):
-        return
+        return self.file_name.split('/')[-1]
+
+    def write_labelled_objects_into_csv(self, csv_file):
+        pass
+
 
 class ImageObject(object):
-    def __init__(self, obj_type, xmin, ymin, xmax, ymax):
+    def __init__(self, obj_type, xmin, xmax, ymin, ymax):
         self.obj_type = obj_type
         self.xmin = xmin
         self.xmax = xmax
@@ -66,13 +64,7 @@ class ImageObject(object):
         if self.obj_type != obj.obj_type:
             return float('inf')
 
-    def calculate_iou(self, obj):
-        pass 
-
-    def flip_vertical_coords(self, width, height):
-        pass
-
-    def flip_horizontal_coords(self, width, height):
+    def get_flipped_coords(self, width, height, vertical_flip=False):
         pass
 
     def __str__(self):
