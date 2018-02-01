@@ -63,6 +63,9 @@ class ImageObject(object):
         if self.obj_type != obj.obj_type:
             return float('inf')
 
+    def calculate_iou(self, obj):
+        pass 
+
     def flip_vertical_coords(self, width, height):
         pass
 

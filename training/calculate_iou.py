@@ -1,15 +1,14 @@
 '''
-    Augment the picture dataset by flipping the images on horizontal
-    and or vertical scale.
+    Calculate IOU
 '''
 import argparse
 import os
 
 # HACK IN PYTHONPATH SO WE CAN USE object_detector_utils
 import sys
-sys.path(0, os.path.join(os.path.expanduser('~'), 'w3p'))
+sys.path.insert(0, os.path.join(os.path.expanduser('~'), 'w3p'))
 
-from object_detector_utils
+#from object_detector_utils 
 from training.utils.image_utils import ImageContainer, build_labelled_csv_dictionary
 
 IMAGE = "pitcher"
@@ -26,13 +25,6 @@ def generator_for_test_image(csv_dict):
             yield img
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-hor', '--horizontal', dest='horizontal', type=bool,
-                        default=True, help='Flip Horizontally.')
-    parser.add_argument('-ver', '--vertical', dest='vertical', type=bool,
-                        default=False, help='Flip Vertically.')
-    args = parser.parse_args()
-
     # setup tf session model
     csv_test_dict = build_labelled_csv_dictionary(CSV_TEST_FILE)
     for image in generator_for_test_image(csv_test_dict):
