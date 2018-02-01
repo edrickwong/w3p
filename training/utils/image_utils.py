@@ -65,7 +65,18 @@ class ImageObject(object):
             return float('inf')
 
     def get_flipped_coords(self, width, height, vertical_flip=False):
-        pass
+        if vertical_flip:
+            # flip along the y-axis
+            # ymin ymax stay the same  
+            new_xmax = width - self.xmin
+            new_xmin = width - self.xmax
+            return new_xmin, new_xmax, self.ymin, self.ymax
+        else:
+            # flip along the x-axis
+            # xmin xmax stay the same
+            new_ymin = height - self.ymax
+            new_ymax = height - self.ymin
+            return self.xmin, self.xmax, new_ymin, new_ymax
 
     def __str__(self):
         return '%s::%s,%s,%s,%s' %(self.obj_type,
