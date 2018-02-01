@@ -12,10 +12,11 @@ from multiprocessing import Queue, Pool
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 
+'''
 CWD_PATH = os.getcwd()
 
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
-MODEL_NAME = 'ssd_mobilenet_v1_coco_11_06_2017'
+MODEL_NAME = 'ssd_mobilenet_v1_coco_11_06_2017' 
 PATH_TO_CKPT = os.path.join(CWD_PATH, 'object_detection', MODEL_NAME, 'frozen_inference_graph.pb')
 
 # List of the strings that is used to add correct label for each box.
@@ -28,7 +29,7 @@ label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
 categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES,
                                                             use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
-
+'''
 
 def detect_objects_no_vis(image_np, sess, detection_graph):
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
@@ -51,7 +52,7 @@ def detect_objects_no_vis(image_np, sess, detection_graph):
 
     return (boxes, scores, classes, num_detections)
 
-
+'''
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-img', '--image', dest='image', type=str,
@@ -91,3 +92,4 @@ if __name__ == '__main__':
     print "Std Dev: %ss " %(np.std(execution_times))
     print "95th percentile: %ss" %(np.percentile(execution_times, 95))
     print "99th percentile: %ss" %(np.percentile(execution_times, 99))
+'''
