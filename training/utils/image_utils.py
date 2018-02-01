@@ -46,7 +46,7 @@ class ImageContainer(object):
             return False
 
     @property
-    def file_name(self):
+    def file_name_short(self):
         return
 
 class ImageObject(object):

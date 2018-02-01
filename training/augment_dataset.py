@@ -17,7 +17,8 @@ def generate_images():
     for f in os.listdir(IMAGES_FOLDER):
         full_file_name = os.path.join(IMAGES_FOLDER, f)
         if os.path.isfile(full_file_name):
-            yield ImageContainer(full_file_name)
+            img = ImageContainer(full_file_name)
+            yield img
 
 def main():
     parser = argparse.ArgumentParser()
