@@ -6,7 +6,7 @@ class ImageContainer(object):
     '''
         Generic class for a single image. Defined by image_name and location
     '''
-    def __init__(self, file_name):
+    def __init__(self, file_name, lazy_load=False):
         self.file_name = file_name
         # if its an original image, or it was rotated or flipped
         self.is_original = True
@@ -19,13 +19,13 @@ class ImageContainer(object):
         self.detected_objects = []
         self.labelled_objects = []
 
+        if not lazy_load:
+            self.read_image()
+
     def read_image(self):
         if not self.image:
             self.image = cv2.imread(self.file_name)
             self.width, self.height = self.image.shape
-
-    def detect_objects(self, model):
-        self.read_image()
 
     def get_flipped_image_horizontal(self):
         pass
