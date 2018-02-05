@@ -6,7 +6,7 @@ import argparse
 import cv2
 import os
 from collections import defaultdict
-from utils.image_utils import ImageContainer, build_labelled_csv_dictionary
+from utils.image_utils import ImageContainer, ImageObject, build_labelled_csv_dictionary
 
 IMAGE = "pitcher"
 TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'w3p', 'training')
@@ -35,11 +35,20 @@ def main():
         csv_dict.update(build_labelled_csv_dictionary(f))
 
     for image in generator_images():
-        image.labelled_images = csv_dict[image.file_name_short]
+        image.labelled_objects = csv_dict[image.file_name_short]
         new_image_name = image.file_name_short.split('.')[0] + 'f' + '.' + image.file_name_short.split('.')[1]
         updated_image = ImageContainer(new_image_name, lazy_load=True)
         updated_image.image = cv2.flip(image.image, FLIP_ARG)
         updated_image.original = False
+        for box in image.labelled_objects:
+            new_coords = box.get_flipped_coords(image.width, image.height, FLIP_ARG)
+            updated_image.labelled_objects.append(ImageObject(box.obj_type,
+                                                              *new_coords))
+
+        image.draw_boxes()
+        updated_image.draw_boxes()
+        cv2.imshow('original', image.image)
+        cv2.imshow('flipped', updated_image.image)
         import pdb ; pdb.set_trace()
 
 if __name__ == "__main__":
