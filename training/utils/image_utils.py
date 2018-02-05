@@ -48,7 +48,7 @@ class ImageContainer(object):
 
 
 class ImageObject(object):
-    def __init__(self, obj_type, xmin, xmax, ymin, ymax):
+    def __init__(self, obj_type, xmin, ymin, xmax, ymax):
         self.obj_type = obj_type
         self.xmin = xmin
         self.xmax = xmax
