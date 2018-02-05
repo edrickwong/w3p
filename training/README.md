@@ -66,7 +66,7 @@ python [path_to_tf_models]/models/research/object_detection/export_inference_gra
 --input_type image_tensor \
 --pipeline_config_path [path_to_w3p]/w3p/training/ssd_mobilenet_v1_coco.config \
 --trained_checkpoint_prefix [path_to_model.ckpt ex: model.ckpt-200000]
---output_directory [name of directory to export model ex: ssd_mobilenet_pitcher]
+--output_directory [name_of_directory_to_export_model ex: ssd_mobilenet_pitcher]
 ```
 
 ## File structure
