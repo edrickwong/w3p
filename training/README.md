@@ -60,6 +60,15 @@ To use tensorboard, run
 tensorboard --logdir=[path_to_directory]/w3p/training
 ```
 
+## Export model
+``` bash
+python [path_to_tf_models]/models/research/object_detection/export_inference_graph.py \
+--input_type image_tensor \
+--pipeline_config_path [path_to_w3p]/w3p/training/ssd_mobilenet_v1_coco.config \
+--trained_checkpoint_prefix [path_to_model.ckpt ex: model.ckpt-200000]
+--output_directory [name of directory to export model ex: ssd_mobilenet_pitcher]
+```
+
 ## File structure
 
 This is the file structure in w3p:
