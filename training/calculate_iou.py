@@ -15,7 +15,6 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~'), 'w3p'))
 from object_detector_app.object_detect_single import detect_objects_no_vis 
 from training.utils.image_utils import ImageContainer, build_labelled_csv_dictionary, ImageObject
 
-DETECT_THRESHOLD = 0.5
 IOU_THRESHOLD = 0.3
 IMAGE = "pitcher"
 TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'w3p', 'training')
@@ -98,10 +97,10 @@ def main():
         for iou in image.ious:
             if iou >= IOU_THRESHOLD:
                 if image.detected_objects
-        #image.draw_boxes()
-        #cv2.imshow('original', image.image)
-        #cv2.waitKey(0)
-        #cv2.destroyAllWindows()
+        image.draw_boxes()
+        cv2.imshow('original', image.image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
         import pdb ; pdb.set_trace()
     
     # print average iou
