@@ -1,5 +1,6 @@
 import cv2
 import csv
+import os
 from random import randint
 from collections import defaultdict
 
@@ -50,22 +51,19 @@ class ImageContainer(object):
     def __repr__(self):
         return self.file_name
 
-    def save_file(self):
+    def save_image(self, folder=None):
         if self.is_original:
-            # Log something here about not being able to overrwrite originals
-            # Just for data integrity sake here
             raise AlreadySavedException('Trying to save original image')
 
         if self.image_updated:
             raise DirtyImageException('This image has external artifacts that'\
                                       ' shouldnt be saved to mess up pipeline')
 
+        cv2.imwrite(self.file_name, self.image)
+
     @property
     def file_name_short(self):
         return self.file_name.split('/')[-1]
-
-    def write_labelled_objects_into_csv(self, csv_file):
-        pass
 
     def draw_boxes(self, thickness=3):
         for box in self.labelled_objects:
@@ -75,8 +73,10 @@ class ImageContainer(object):
 
 
 class ImageObject(object):
-    def __init__(self, obj_type, xmin, ymin, xmax, ymax):
+    def __init__(self, width, height, obj_type, xmin, ymin, xmax, ymax):
         self.obj_type = obj_type
+        self.height = int(height)
+        self.width = int(width)
         self.xmin = int(xmin)
         self.xmax = int(xmax)
         self.ymin = int(ymin)
@@ -134,8 +134,8 @@ class ImageObject(object):
     def __repr__(self):
         return '%s::%s,%s,%s,%s' %(self.obj_type,
                                    self.xmin,
-                                   self.xmax,
                                    self.ymin,
+                                   self.xmax,
                                    self.ymax)
 
 def build_labelled_csv_dictionary(csv_file_name):
@@ -147,6 +147,6 @@ def build_labelled_csv_dictionary(csv_file_name):
             # skip first row
             if 'filename' == row[0]:
                 continue
-            res[row[0]].append(ImageObject(*row[3:]))
+            res[row[0]].append(ImageObject(*row[1:]))
 
     return res
