@@ -7,6 +7,9 @@ from collections import defaultdict
 def generate_random_rgb_color():
     return (randint(0,255), randint(0,255), randint(0,255))
 
+BLUE = (0,0,200)
+RED = (200,0,0)
+
 class AlreadySavedException(Exception):
     pass
 
@@ -36,6 +39,7 @@ class ImageContainer(object):
         self.height = None
         self.detected_objects = []
         self.labelled_objects = []
+        self.ious = []
 
         if not lazy_load:
             self.read_image()
@@ -66,11 +70,20 @@ class ImageContainer(object):
         return self.file_name.split('/')[-1]
 
     def draw_boxes(self, thickness=3):
-        for box in self.labelled_objects:
-            self.image_updated = True
-            cv2.rectangle(self.image, box.left_corner, box.right_corner,
-                          generate_random_rgb_color(), thickness)
-
+        if not self.detected_objects:
+            for box in self.labelled_objects:
+                self.image_updated = True
+                cv2.rectangle(self.image, box.left_corner, box.right_corner,
+                              generate_random_rgb_color(), thickness)
+        else:
+            print 'here'
+            for box in self.labelled_objects:
+                self.image_updated = True
+                cv2.rectangle(self.image, box.left_corner, box.right_corner, (0,0,255), thickness)
+            for box in self.detected_objects:
+                self.image_updated = True
+                print box.left_corner
+                cv2.rectangle(self.image, box.left_corner, box.right_corner, (255,0,0), thickness)
 
 class ImageObject(object):
     def __init__(self, width, height, obj_type, xmin, ymin, xmax, ymax):

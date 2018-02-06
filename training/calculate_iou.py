@@ -6,15 +6,17 @@ import os
 import tensorflow as tf
 from object_detection.utils import label_map_util
 import numpy as np
+import cv2
 
 # HACK IN PYTHONPATH SO WE CAN USE object_detector_utils
 import sys
 sys.path.insert(0, os.path.join(os.path.expanduser('~'), 'w3p'))
 
 from object_detector_app.object_detect_single import detect_objects_no_vis 
-from training.utils.image_utils import ImageContainer, build_labelled_csv_dictionary
+from training.utils.image_utils import ImageContainer, build_labelled_csv_dictionary, ImageObject
 
 DETECT_THRESHOLD = 0.5
+IOU_THRESHOLD = 0.3
 IMAGE = "pitcher"
 TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'w3p', 'training')
 IMAGES_FOLDER = os.path.join(TRAIN_FOLDER, IMAGE)
@@ -74,22 +76,33 @@ def main():
     for image in generator_for_test_image(csv_test_dict):
         boxes, scores, classes, num_detections = detect_objects_no_vis(image.image, sess, detection_graph)
         # for scores greater than threshold
-        pred_box = []
-        ground_box = []
         for i in range(len(scores[0])):
+            pred_box = []
+            ground_box = []
             if scores[0][i] < DETECT_THRESHOLD:
                 break
             box = np.squeeze(boxes[0][i])
             pred_box = [box[0]*image.width, box[2]*image.width, box[1]*image.height, box[3]*image.height]
             obj_class = category_index[classes[0][i]]['name']
+            img = ImageObject(image.width, image.height, obj_class, box[0]*image.width, box[1]*image.height, box[2]*image.width, box[3]*image.height)
+            image.detected_objects.append(img)
+            ious = []
             for obj in image.labelled_objects:
-                if obj.obj_type in obj_class:
+                if str(obj.obj_type) == str(obj_class):
                     ground_box = [float(obj.xmin), float(obj.xmax), float(obj.ymin), float(obj.ymax)]
-                    break
-        # calculate iou
-        if ground_box and pred_box: 
-            iou_res.append(iou(ground_box,pred_box))
-        #import pdb ; pdb.set_trace()
+                    ious.append(iou(ground_box,pred_box))
+            # calculate iou
+            if ground_box and pred_box: 
+                iou_res.append(max(ious))
+                image.ious.append(max(ious))
+        for iou in image.ious:
+            if iou >= IOU_THRESHOLD:
+                if image.detected_objects
+        #image.draw_boxes()
+        #cv2.imshow('original', image.image)
+        #cv2.waitKey(0)
+        #cv2.destroyAllWindows()
+        import pdb ; pdb.set_trace()
     
     # print average iou
     print 'average iou: ' , np.average(iou_res)
