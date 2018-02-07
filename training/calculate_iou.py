@@ -7,6 +7,7 @@ import tensorflow as tf
 from object_detection.utils import label_map_util
 import numpy as np
 import cv2
+import operator
 
 # HACK IN PYTHONPATH SO WE CAN USE object_detector_utils
 import sys
@@ -15,6 +16,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~'), 'w3p'))
 from object_detector_app.object_detect_single import detect_objects_no_vis 
 from training.utils.image_utils import ImageContainer, build_labelled_csv_dictionary, ImageObject
 
+DETECT_THRESHOLD = 0.5
 IOU_THRESHOLD = 0.3
 IMAGE = "pitcher"
 TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'w3p', 'training')
@@ -35,6 +37,13 @@ categories = label_map_util.convert_label_map_to_categories(label_map, max_num_c
 category_index = label_map_util.create_category_index(categories)
 
 iou_res = []
+TP = {}
+FP = {}
+class_precision = {}
+
+for i in range(len(category_index)):
+    TP[str(category_index[i+1]['name'])] = 0
+    FP[str(category_index[i+1]['name'])] = 0
 
 def generator_for_test_image(csv_dict):
     for f in os.listdir(IMAGES_FOLDER):
@@ -94,19 +103,43 @@ def main():
             if ground_box and pred_box: 
                 iou_res.append(max(ious))
                 image.ious.append(max(ious))
-        for iou in image.ious:
-            if iou >= IOU_THRESHOLD:
-                if image.detected_objects
-        image.draw_boxes()
-        cv2.imshow('original', image.image)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-        import pdb ; pdb.set_trace()
-    
+
+            # calculate iou and map
+            iou_class = {}
+            for obj in image.labelled_objects: # calculate iou to each object in image
+                ground_box = [float(obj.xmin), float(obj.xmax), float(obj.ymin), float(obj.ymax)]
+                iou_class[str(obj.obj_type)] = iou(ground_box,pred_box)
+            # get max iou
+            max_iouClass = max(iou_class.iteritems(), key=operator.itemgetter(1))[0]
+            # get precisions 
+            if iou_class[max_iouClass] >= IOU_THRESHOLD:
+                if max_iouClass == str(obj_class):
+                    TP[max_iouClass] += 1
+                else:
+                    FP[max_iouClass] += 1
+
+        #image.draw_boxes()
+        #cv2.imshow('original', image.image)
+        #cv2.waitKey(0)
+        #cv2.destroyAllWindows()
+        #import pdb ; pdb.set_trace()
+
+    # mean average precision 
+    mean_ap = 0
+    # average precision for each class
+    for i in range(len(category_index)):
+        category = str(category_index[i+1]['name'])
+        class_precision[category] = TP[category] / (TP[category] + FP[category]) * 100
+        mean_ap += class_precision[category]
+
+    mean_ap = mean_ap / float(len(category_index))
+
     # print average iou
     print 'average iou: ' , np.average(iou_res)
     print 'max iou: ' , max(iou_res)
     print 'min iou: ' , min(iou_res)
+    print 'class precisions: ', class_precision
+    print 'mAP: ', mean_ap
 
 if __name__ == "__main__":
     main()

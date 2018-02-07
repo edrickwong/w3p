@@ -40,6 +40,7 @@ class ImageContainer(object):
         self.detected_objects = []
         self.labelled_objects = []
         self.ious = []
+        self.precision = []
 
         if not lazy_load:
             self.read_image()
