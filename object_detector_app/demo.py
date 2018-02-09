@@ -209,9 +209,17 @@ if __name__ == '__main__':
     socket_connection = SocketConnection(TCP_IP, TCP_PORT)
     # override num workers if tensorflow gpu is being used
     num_workers = args.num_workers
+
     if is_using_tensorflow_gpu() and num_workers > 1:
         print "Using GPU, not allowed to multiproc workers."
         num_workers = 1
+    # we need to moderate the number of workers that get spawned
+    # for cou depending on the number of cpus/vpcus avaiable
+    # if not we are def going to run into some random perf
+    # (too much context switching between IO filled workers
+    else:
+        num_workers = min(multiprocessing.cpu_count(),
+                          num_workers)
 
     input_q = Queue(maxsize=args.queue_size)
     output_q = Queue(maxsize=args.queue_size)
