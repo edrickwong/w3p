@@ -1,0 +1,26 @@
+<annotation>
+	<folder>kettle</folder>
+	<filename>IMG_1780.jpg</filename>
+	<path>/home/anshuman/w3p/training/kettle/IMG_1780.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>4032</width>
+		<height>3024</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>kettle</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1611</xmin>
+			<ymin>845</ymin>
+			<xmax>2978</xmax>
+			<ymax>2461</ymax>
+		</bndbox>
+	</object>
+</annotation>
