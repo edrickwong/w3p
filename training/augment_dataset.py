@@ -8,21 +8,9 @@ import cv2
 import os
 from collections import defaultdict
 from datetime import datetime
-from utils.image_utils import ImageContainer, ImageObject, build_labelled_csv_dictionary
+from utils.image_utils import ImageContainer, ImageObject, build_labelled_csv_dictionary, write_to_csv_file, generator_images
 
-IMAGE = "pitcher"
-TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'w3p', 'training')
-IMAGES_FOLDER = os.path.join(TRAIN_FOLDER, IMAGE)
-CSV_FILES = [os.path.join(TRAIN_FOLDER, 'test_labels.csv'),
-             os.path.join(TRAIN_FOLDER, 'train_labels.csv')]
-TRAINING_PERCENTAGE = 0.7
-
-def generator_images():
-    for f in os.listdir(IMAGES_FOLDER):
-        full_file_name = os.path.join(IMAGES_FOLDER, f)
-        if os.path.isfile(full_file_name):
-            img = ImageContainer(full_file_name)
-            yield img
+CSV_FILES = [os.path.join(TRAIN_FOLDER, 'images.csv')]
 
 def main():
     parser = argparse.ArgumentParser()
@@ -80,18 +68,6 @@ def main():
         pass
     except Exception as e:
         print e
-
-    # write cur csv_dict
-    with open(os.path.join(TRAIN_FOLDER, 'images.csv'), 'wb') as f:
-        csv_writer = csv.writer(f, delimiter=",")
-        title_row = ['filename', 'width', 'height', 'class', 'xmin', 'ymin',
-                     'xmax', 'ymax']
-        csv_writer.writerow(title_row)
-        for file_name, objects in csv_dict.iteritems():
-            for obj in objects:
-                row = [file_name, obj.width, obj.height, obj.obj_type,
-                       obj.xmin, obj.ymin, obj.xmax, obj.ymax]
-                csv_writer.writerow(row)
 
 
 if __name__ == "__main__":
