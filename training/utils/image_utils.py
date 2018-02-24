@@ -132,7 +132,16 @@ class ImageObject(object):
         if self.obj_type != obj.obj_type:
             return float('inf')
 
-    def get_flipped_coords(self, width, height, vertical_flip=False):
+    def get_flipped_coords(self, width, height, vertical_flip=False,
+                           both_flip=False):
+        if both_flip:
+            # flip along both axis (rotate 180)
+            new_xmax = width - self.xmin
+            new_xmin = width - self.xmax
+            new_ymin = height - self.ymax
+            new_ymax = height - self.ymin
+            return new_xmin, new_ymin, new_xmax, new_ymax
+
         if vertical_flip:
             # flip along the y-axis
             # ymin ymax stay the same
