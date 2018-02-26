@@ -11,7 +11,11 @@ from utils.image_utils import ImageContainer, ImageObject, \
                               generator_images, \
                               write_to_csv_file
 
-TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'w3p', 'training')
+home_folder = os.path.expanduser('~')
+if 'justin' in home_folder:
+    TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'Github', 'w3p', 'training')
+else:
+    TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'w3p', 'training')
 CSV_FILES = [os.path.join(TRAIN_FOLDER, 'images.csv')]
 
 def main():

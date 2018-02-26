@@ -8,7 +8,11 @@ BLUE = (0,0,200)
 RED = (200,0,0)
 
 ITEMS = ["kettle", "bottle", "bowl", "cup"]
-TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'w3p', 'training')
+home_folder = os.path.expanduser('~')
+if 'justin' in home_folder:
+    TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'Github', 'w3p', 'training')
+else:
+    TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'w3p', 'training')
 IMAGES_FOLDER = [os.path.join(TRAIN_FOLDER, item) for item in ITEMS]
 
 def generate_random_rgb_color():
@@ -24,6 +28,7 @@ def generator_images(valid_images=None):
             if os.path.isfile(full_file_name):
                 img = ImageContainer(full_file_name)
                 yield img
+
 
 
 class AlreadySavedException(Exception):
@@ -63,8 +68,12 @@ class ImageContainer(object):
 
     def read_image(self):
         if not self.image:
-            self.image = cv2.imread(self.file_name)
-            self.height, self.width, _ = self.image.shape
+            try:
+                self.image = cv2.imread(self.file_name)
+                self.height, self.width, _ = self.image.shape
+            except Exception as e:
+                print e
+                import pdb ; pdb.set_trace()
 
     def __str__(self):
         return self.file_name
