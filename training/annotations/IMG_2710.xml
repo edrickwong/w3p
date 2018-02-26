@@ -1,0 +1,26 @@
+<annotation>
+	<folder>cup</folder>
+	<filename>IMG_2710.jpg</filename>
+	<path>/home/anshuman/w3p/training/cup/IMG_2710.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>4032</width>
+		<height>3024</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>cup</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>720</xmin>
+			<ymin>978</ymin>
+			<xmax>1978</xmax>
+			<ymax>1953</ymax>
+		</bndbox>
+	</object>
+</annotation>

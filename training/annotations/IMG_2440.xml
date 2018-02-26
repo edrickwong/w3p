@@ -1,0 +1,26 @@
+<annotation>
+	<folder>bottle</folder>
+	<filename>IMG_2440.jpg</filename>
+	<path>/home/anshuman/w3p/training/bottle/IMG_2440.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>4032</width>
+		<height>3024</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>bottle</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>970</xmin>
+			<ymin>303</ymin>
+			<xmax>1711</xmax>
+			<ymax>1770</ymax>
+		</bndbox>
+	</object>
+</annotation>

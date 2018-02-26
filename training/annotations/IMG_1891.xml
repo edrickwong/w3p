@@ -1,0 +1,26 @@
+<annotation>
+	<folder>bowl</folder>
+	<filename>IMG_1891.jpg</filename>
+	<path>/home/anshuman/w3p/training/bowl/IMG_1891.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>836</width>
+		<height>626</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>bowl</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>386</xmin>
+			<ymin>225</ymin>
+			<xmax>728</xmax>
+			<ymax>478</ymax>
+		</bndbox>
+	</object>
+</annotation>

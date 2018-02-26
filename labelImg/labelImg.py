@@ -1144,7 +1144,7 @@ class MainWindow(QMainWindow, WindowMixin):
 
     def openNextImg(self, _value=False):
         # Proceding prev image without dialog if having any label
-        if self.autoSaving.isChecked():
+        if self.autoSaving.isChecked() or True:
             if self.defaultSaveDir is not None:
                 if self.dirty is True:
                     self.saveFile()

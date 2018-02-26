@@ -35,16 +35,13 @@ category_index = label_map_util.create_category_index(categories)
 allowed_classes = ['person','bottle','knife','spoon','fork','cup','bowl','dog']
 
 # Detect Threshold
-DETECT_THRESHOLD = 0.3
+DETECT_THRESHOLD = 0.2
 
 # socket globals
 TCP_IP = '127.0.0.1'
 TCP_PORT = 1315
 BUFFER_SIZE = 1024
 
-# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# s.bind((TCP_IP, TCP_PORT))
-# s.listen(1)
 
 class SocketConnection():
     def __init__(self, tcp_ip='127.0.0.1', tcp_port=1315):
@@ -103,7 +100,7 @@ def detect_objects(image_np, sess, detection_graph):
     return image_np, class_box
 
 
-def worker(input_q, output_q, request_q):
+def worker(input_q, output_q, request_q, message_q):
     # Load a (frozen) Tensorflow model into memory.
     detection_graph = tf.Graph()
     with detection_graph.as_default():
@@ -125,14 +122,11 @@ def worker(input_q, output_q, request_q):
         frame = input_q.get()
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image, objects = detect_objects(frame_rgb, sess, detection_graph)
-        # print 'detect objects'
         # dont block if nothing is there
         try:
             obj = request_q.get(block=False)
         except:
             obj = None
-
-        res = {}
 
         if obj:
             # try to build output message from objects
@@ -149,24 +143,21 @@ def worker(input_q, output_q, request_q):
                     msg = obj + ' is to your left'
                 else:
                     msg = obj + ' is to your right'
-            # print msg
-            # this needs to be the connection instance, not a socket instance
+
             print 'worker here'
-            res['msg'] = msg
-        res['img'] = image
-        output_q.put(res)
+            message_q.put(msg)
+        output_q.put(image)
 
     fps.stop()
     sess.close()
 
-def request_worker(request_q, output_q, socket_connection):
+def request_worker(request_q, message_q, socket_connection):
     while not socket_connection.conn:
         socket_connection.conn, addr = socket_connection.s.accept()
-        print 'Waiting on mock connection from Alexa'
+        print 'Waiting on mock connection from Google Assistant'
         time.sleep(1)
 
     while True:
-        # print 'Hit from Google Home'
         # listen on socket for incoming messages
         request_data = socket_connection.conn.recv(BUFFER_SIZE)
 
@@ -182,10 +173,9 @@ def request_worker(request_q, output_q, socket_connection):
             request_q.put(obj)
             print obj
 
-        msg = output_q.get().get('msg')
+        msg = message_q.get()
+        socket_connection.conn.send(msg)
         print(msg)
-        if msg:
-            socket_connection.conn.send(msg)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -209,15 +199,24 @@ if __name__ == '__main__':
     socket_connection = SocketConnection(TCP_IP, TCP_PORT)
     # override num workers if tensorflow gpu is being used
     num_workers = args.num_workers
+
     if is_using_tensorflow_gpu() and num_workers > 1:
         print "Using GPU, not allowed to multiproc workers."
         num_workers = 1
+    # we need to moderate the number of workers that get spawned
+    # for cou depending on the number of cpus/vpcus avaiable
+    # if not we are def going to run into some random perf
+    # (too much context switching between IO filled workers
+    else:
+        num_workers = min(multiprocessing.cpu_count(),
+                          num_workers)
 
     input_q = Queue(maxsize=args.queue_size)
     output_q = Queue(maxsize=args.queue_size)
     request_q = Queue(maxsize=args.queue_size)
-    pool = Pool(num_workers, worker, (input_q, output_q, request_q))
-    request_p = Process(target=request_worker, args=(request_q, output_q, socket_connection,))
+    message_q = Queue(maxsize=args.queue_size)
+    pool = Pool(num_workers, worker, (input_q, output_q, request_q, message_q))
+    request_p = Process(target=request_worker, args=(request_q, message_q, socket_connection,))
     request_p.start()
 
     video_capture = WebcamVideoStream(src=args.video_source,
@@ -230,7 +229,7 @@ if __name__ == '__main__':
         input_q.put(frame)
 
         t = time.time()
-        output_rgb = cv2.cvtColor(output_q.get().get('img'), cv2.COLOR_RGB2BGR)
+        output_rgb = cv2.cvtColor(output_q.get(), cv2.COLOR_RGB2BGR)
         cv2.imshow('Video', output_rgb)
         fps.update()
 

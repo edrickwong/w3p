@@ -4,11 +4,32 @@ import os
 from random import randint
 from collections import defaultdict
 
+BLUE = (0,0,200)
+RED = (200,0,0)
+
+ITEMS = ["kettle", "bottle", "bowl", "cup"]
+home_folder = os.path.expanduser('~')
+if 'justin' in home_folder:
+    TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'Github', 'w3p', 'training')
+else:
+    TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'w3p', 'training')
+IMAGES_FOLDER = [os.path.join(TRAIN_FOLDER, item) for item in ITEMS]
+
 def generate_random_rgb_color():
     return (randint(0,255), randint(0,255), randint(0,255))
 
-BLUE = (0,0,200)
-RED = (200,0,0)
+
+def generator_images(valid_images=None):
+    for folder in IMAGES_FOLDER:
+        for f in os.listdir(folder):
+            full_file_name = os.path.join(folder, f)
+            if valid_images and f not in valid_images:
+                continue
+            if os.path.isfile(full_file_name):
+                img = ImageContainer(full_file_name)
+                yield img
+
+
 
 class AlreadySavedException(Exception):
     pass
@@ -47,8 +68,12 @@ class ImageContainer(object):
 
     def read_image(self):
         if not self.image:
-            self.image = cv2.imread(self.file_name)
-            self.height, self.width, _ = self.image.shape
+            try:
+                self.image = cv2.imread(self.file_name)
+                self.height, self.width, _ = self.image.shape
+            except Exception as e:
+                print e
+                import pdb ; pdb.set_trace()
 
     def __str__(self):
         return self.file_name
@@ -86,6 +111,7 @@ class ImageContainer(object):
                 print box.left_corner
                 cv2.rectangle(self.image, box.left_corner, box.right_corner, (255,0,0), thickness)
 
+
 class ImageObject(object):
     def __init__(self, width, height, obj_type, xmin, ymin, xmax, ymax):
         self.obj_type = obj_type
@@ -115,7 +141,16 @@ class ImageObject(object):
         if self.obj_type != obj.obj_type:
             return float('inf')
 
-    def get_flipped_coords(self, width, height, vertical_flip=False):
+    def get_flipped_coords(self, width, height, vertical_flip=False,
+                           both_flip=False):
+        if both_flip:
+            # flip along both axis (rotate 180)
+            new_xmax = width - self.xmin
+            new_xmin = width - self.xmax
+            new_ymin = height - self.ymax
+            new_ymax = height - self.ymin
+            return new_xmin, new_ymin, new_xmax, new_ymax
+
         if vertical_flip:
             # flip along the y-axis
             # ymin ymax stay the same
@@ -129,7 +164,7 @@ class ImageObject(object):
             new_ymax = height - self.ymin
             return self.xmin, new_ymin, self.xmax, new_ymax
 
-    def verify_coords(self):
+    def verify_coords(self, ignore_image_dims=False):
         # we are initalizing these objects all over the place, so lets just
         # do a sanity check to make sure the bounding boxes make sense
         # ie. xmax > xmin and ymax > ymin
@@ -138,6 +173,31 @@ class ImageObject(object):
 
         if self.ymax < self.ymin:
             raise ValueError('ymax for a bounding box must be greater than ymin')
+
+        if ignore_image_dims:
+            return
+
+        if self.height and self.ymax > self.height:
+            raise ValueError('ymax for bounding box has to be less than '\
+                             'height of image')
+
+        if self.width and self.xmax > self.width:
+            raise ValueError('ymax for bounding box has to be less than '\
+                             'height of image')
+
+    def resize_coords(self, new_width, new_height, update_dims=True):
+        # update bounding box coordinates if image is being downsampled or
+        # upsamped
+        self.xmin = int((float(new_width)/self.width) * self.xmin)
+        self.xmax = int((float(new_width)/self.width) * self.xmax)
+        self.ymin = int((float(new_height)/self.height) * self.ymin)
+        self.ymax = int((float(new_height)/self.height) * self.ymax)
+
+        if update_dims:
+            self.width = new_width
+            self.height = new_height
+
+        self.verify_coords(ignore_image_dims=update_dims)
 
     def __str__(self):
         return '%s::%s,%s,%s,%s' %(self.obj_type,
@@ -164,3 +224,15 @@ def build_labelled_csv_dictionary(csv_file_name):
             res[row[0]].append(ImageObject(*row[1:]))
 
     return res
+
+def write_to_csv_file(csv_file_name, csv_dict):
+    with open(os.path.join(TRAIN_FOLDER, csv_file_name), 'wb') as f:
+        csv_writer = csv.writer(f, delimiter=",")
+        title_row = ['filename', 'width', 'height', 'class', 'xmin', 'ymin',
+                     'xmax', 'ymax']
+        csv_writer.writerow(title_row)
+        for file_name, objects in csv_dict.iteritems():
+            for obj in objects:
+                row = [file_name, obj.width, obj.height, obj.obj_type,
+                       obj.xmin, obj.ymin, obj.xmax, obj.ymax]
+                csv_writer.writerow(row)
