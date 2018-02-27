@@ -13,18 +13,18 @@ import operator
 import sys
 sys.path.insert(0, os.path.join(os.path.expanduser('~'), 'w3p'))
 
-from object_detector_app.object_detect_single import detect_objects_no_vis 
-from training.utils.image_utils import ImageContainer, build_labelled_csv_dictionary, ImageObject
+from object_detector_app.object_detect_single import detect_objects_no_vis
+from training.utils.image_utils import ImageContainer, build_labelled_csv_dictionary, ImageObject,
+                                       TRAIN_FOLDER
 
 DETECT_THRESHOLD = 0.5
 IOU_THRESHOLD = 0.3
 IMAGE = "pitcher"
-TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'w3p', 'training')
 IMAGES_FOLDER = os.path.join(TRAIN_FOLDER, IMAGE)
 CSV_TEST_FILE = os.path.join(TRAIN_FOLDER, 'test_labels.csv')
 MODEL_NAME = 'ssd_mobilenet_pitcher'
 PATH_TO_CKPT = os.path.join(TRAIN_FOLDER, MODEL_NAME, 'frozen_inference_graph.pb')
-#MODEL_NAME = 'ssd_mobilenet_v1_coco_11_06_2017' 
+#MODEL_NAME = 'ssd_mobilenet_v1_coco_11_06_2017'
 #PATH_TO_CKPT = os.path.join('/Users/lindawang/w3p/object_detector_app/object_detection/ssd_mobilenet_v1_coco_11_06_2017', 'frozen_inference_graph.pb')
 PATH_TO_LABELS = os.path.join(TRAIN_FOLDER, 'label_map.pbtxt')
 
@@ -54,12 +54,12 @@ def generator_for_test_image(csv_dict):
             yield img
 
 def iou(ground_truth, prediction):
-    max_xmin = max(ground_truth[0],prediction[0]) # get max from xmins 
+    max_xmin = max(ground_truth[0],prediction[0]) # get max from xmins
     min_xmax = min(ground_truth[1],prediction[1]) # get min from xmaxes
     max_ymin = max(ground_truth[2],prediction[2]) # get max from ymins
     min_ymax = min(ground_truth[3],prediction[3]) # get min from ymaxes
-    
-    # compute intersection 
+
+    # compute intersection
     intersection = (min_xmax - max_xmin + 1) * (min_ymax - max_ymin + 1)
 
     # compute union
@@ -100,7 +100,7 @@ def main():
                     ground_box = [float(obj.xmin), float(obj.xmax), float(obj.ymin), float(obj.ymax)]
                     ious.append(iou(ground_box,pred_box))
             # calculate iou
-            if ground_box and pred_box: 
+            if ground_box and pred_box:
                 iou_res.append(max(ious))
                 image.ious.append(max(ious))
 
@@ -111,7 +111,7 @@ def main():
                 iou_class[str(obj.obj_type)] = iou(ground_box,pred_box)
             # get max iou
             max_iouClass = max(iou_class.iteritems(), key=operator.itemgetter(1))[0]
-            # get precisions 
+            # get precisions
             if iou_class[max_iouClass] >= IOU_THRESHOLD:
                 if max_iouClass == str(obj_class):
                     TP[max_iouClass] += 1
@@ -124,7 +124,7 @@ def main():
         #cv2.destroyAllWindows()
         #import pdb ; pdb.set_trace()
 
-    # mean average precision 
+    # mean average precision
     mean_ap = 0
     # average precision for each class
     for i in range(len(category_index)):

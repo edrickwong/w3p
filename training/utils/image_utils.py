@@ -8,27 +8,32 @@ BLUE = (0,0,200)
 RED = (200,0,0)
 
 ITEMS = ["kettle", "bottle", "bowl", "cup"]
+
 home_folder = os.path.expanduser('~')
 if 'justin' in home_folder:
-    TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'Github', 'w3p', 'training')
+    TRAIN_FOLDER = os.path.join(home_folder, 'Github', 'w3p', 'training')
 else:
-    TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'w3p', 'training')
-IMAGES_FOLDER = [os.path.join(TRAIN_FOLDER, item) for item in ITEMS]
+    TRAIN_FOLDER = os.path.join(home_folder, 'w3p', 'training')
+IMAGES_FOLDER = [os.path.join(TRAIN_FOLDER, item) for item in ITEMS[1:]]
 
 def generate_random_rgb_color():
     return (randint(0,255), randint(0,255), randint(0,255))
 
 
-def generator_images(valid_images=None):
+def generator_images(valid_images=None, ignore_flipped_images=True):
     for folder in IMAGES_FOLDER:
         for f in os.listdir(folder):
             full_file_name = os.path.join(folder, f)
             if valid_images and f not in valid_images:
                 continue
+            if ignore_flipped_images:
+                if '_h' in f:
+                    continue
+                if '_v' in f:
+                    continue
             if os.path.isfile(full_file_name):
                 img = ImageContainer(full_file_name)
                 yield img
-
 
 
 class AlreadySavedException(Exception):
@@ -95,6 +100,10 @@ class ImageContainer(object):
     def file_name_short(self):
         return self.file_name.split('/')[-1]
 
+    @property
+    def folder_name(self):
+        return os.path.join('/', *self.file_name.split('/')[:-1])
+
     def draw_boxes(self, thickness=3):
         if not self.detected_objects:
             for box in self.labelled_objects:
@@ -102,7 +111,7 @@ class ImageContainer(object):
                 cv2.rectangle(self.image, box.left_corner, box.right_corner,
                               generate_random_rgb_color(), thickness)
         else:
-            print 'here'
+            #print 'here'
             for box in self.labelled_objects:
                 self.image_updated = True
                 cv2.rectangle(self.image, box.left_corner, box.right_corner, (0,0,255), thickness)
@@ -212,6 +221,7 @@ class ImageObject(object):
                                    self.xmax,
                                    self.ymax)
 
+
 def build_labelled_csv_dictionary(csv_file_name):
     res = defaultdict(list)
 
@@ -224,6 +234,7 @@ def build_labelled_csv_dictionary(csv_file_name):
             res[row[0]].append(ImageObject(*row[1:]))
 
     return res
+
 
 def write_to_csv_file(csv_file_name, csv_dict):
     with open(os.path.join(TRAIN_FOLDER, csv_file_name), 'wb') as f:

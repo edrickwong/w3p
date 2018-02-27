@@ -11,9 +11,9 @@ from datetime import datetime
 from utils.image_utils import ImageContainer, ImageObject, \
                               build_labelled_csv_dictionary, \
                               generator_images, \
-                              write_to_csv_file
+                              write_to_csv_file, \
+                              TRAIN_FOLDER
 
-TRAIN_FOLDER = os.path.join(os.path.expanduser('~'), 'w3p', 'training')
 CSV_FILES = [os.path.join(TRAIN_FOLDER, 'images.csv')]
 
 def main():
