@@ -12,6 +12,7 @@ from utils.misc_utils import is_using_tensorflow_gpu
 from multiprocessing import Queue, Pool, Process
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
+from object_detection.worker_utils import MessageWorker
 from tts import PythonTTS, cmdLineTTS
 
 CWD_PATH = os.getcwd()
@@ -36,19 +37,6 @@ allowed_classes = ['person','bottle','knife','spoon','fork','cup','bowl','dog']
 
 # Detect Threshold
 DETECT_THRESHOLD = 0.2
-
-# socket globals
-TCP_IP = '127.0.0.1'
-TCP_PORT = 1315
-BUFFER_SIZE = 1024
-
-
-class SocketConnection():
-    def __init__(self, tcp_ip='127.0.0.1', tcp_port=1315):
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.bind((tcp_ip, tcp_port))
-        self.s.listen(1)
-        self.conn = None
 
 
 def detect_objects(image_np, sess, detection_graph):
@@ -177,6 +165,7 @@ def request_worker(request_q, message_q, socket_connection):
         socket_connection.conn.send(msg)
         print(msg)
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-src', '--source', dest='video_source', type=int,
@@ -196,28 +185,32 @@ if __name__ == '__main__':
     logger = multiprocessing.log_to_stderr()
     logger.setLevel(multiprocessing.SUBDEBUG)
 
-    socket_connection = SocketConnection(TCP_IP, TCP_PORT)
     # override num workers if tensorflow gpu is being used
     num_workers = args.num_workers
-
     if is_using_tensorflow_gpu() and num_workers > 1:
         print "Using GPU, not allowed to multiproc workers."
         num_workers = 1
+
     # we need to moderate the number of workers that get spawned
-    # for cou depending on the number of cpus/vpcus avaiable
+    # for cpu depending on the number of cpus/vpcus avaiable
     # if not we are def going to run into some random perf
     # (too much context switching between IO filled workers
     else:
         num_workers = min(multiprocessing.cpu_count(),
                           num_workers)
 
+    # need 4 queues to pass relevant information between the various
+    # procs.
     input_q = Queue(maxsize=args.queue_size)
     output_q = Queue(maxsize=args.queue_size)
     request_q = Queue(maxsize=args.queue_size)
     message_q = Queue(maxsize=args.queue_size)
+
     pool = Pool(num_workers, worker, (input_q, output_q, request_q, message_q))
-    request_p = Process(target=request_worker, args=(request_q, message_q, socket_connection,))
-    request_p.start()
+
+    # interface with google home/flask client
+    msg_worker = MessageWorker(request_q, message_q)
+    msg_worker.start()
 
     video_capture = WebcamVideoStream(src=args.video_source,
                                       width=args.width,
@@ -242,7 +235,7 @@ if __name__ == '__main__':
     print('[INFO] elapsed time (total): {:.2f}'.format(fps.elapsed()))
     print('[INFO] approx. FPS: {:.2f}'.format(fps.fps()))
 
-    request_p.join()
+    msg_worker.join()
     pool.terminate()
     video_capture.stop()
     while True:
