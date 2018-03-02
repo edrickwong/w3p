@@ -2,12 +2,14 @@ import cv2
 import multiprocessing
 import socket
 import tensorflow as tf
+import time
 
 from defaults import *
 from multiprocessing import Queue, Pool, Process
-#from user_feedback_utils import UserFeedbackGenerator
 from object_detector_utils import ObjectDetector
 
+# logger object for more succicnt output
+logger = multiprocessing.get_logger()
 
 class MessageWorker(Process):
     '''
@@ -30,6 +32,7 @@ class MessageWorker(Process):
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.bind((self.tcp_ip, self.tcp_port))
         self._socket.listen(1)
+        self._socket.settimeout(5)
         self._conn = None
 
         # boolean to see if we should end the event loop
@@ -40,8 +43,10 @@ class MessageWorker(Process):
         self.wait_for_incoming_connection()
 
         # Enter Event loop
+        logger.debug('Entering event loop for Message Worker')
         while not self.kill_process:
             request_data = self._conn.recv(self.buffer_size)
+            logger.debug('Request data: %s' %(request_data))
             print request_data
 
 	    # find object that user is asking for
@@ -59,7 +64,7 @@ class MessageWorker(Process):
 
 	    if obj:
 		self.request_q.put(obj)
-		print obj
+		# print obj
 
             # TODO: The code below makes an assumption that the flop from request_q
             # to message_q will always work, so in case the request_q fails for
@@ -72,14 +77,21 @@ class MessageWorker(Process):
             #        ie. we spin until we here from the above procs (similar
             #        to using signals in threads)
 	    msg = self.message_q.get()
+            logger.debug(msg)
 	    self._conn.send(msg)
-	    print(msg)
+
+        # clean up socket on close
+        logger.debug('Closing socket connection')
+        self._conn.close()
 
     def wait_for_incoming_connection(self):
         while not self._conn:
-            self._conn, _ = self._socket.accept()
-            print 'Waiting on mock connection from Google Assistant'
-            time.sleep(1)
+            try:
+                self._conn, _ = self._socket.accept()
+                logger.warning('Accepted connection from: %s' %(self._conn))
+            except socket.timeout:
+                logger.warning('Waiting on connection from Google Assistant')
+                time.sleep(1)
 
 
 class OutputImageStreamWorker(Process):
@@ -118,6 +130,9 @@ class OutputImageStreamWorker(Process):
 
 
 class ObjectDetectoResponseWorker(Process):
+    '''
+        TODO: Add comments
+    '''
     def __init__(self, img_input_q, request_q, message_q, *args, **kwargs):
         super(ObjectDetectoResponseWorker, self).__init__(*args, **kwargs)
         self.input_img_q = img_input_q
@@ -137,6 +152,7 @@ class ObjectDetectoResponseWorker(Process):
         self._object_detector = ObjectDetector()
 
         # Enter Event loop for worker
+        logger.debug('Entering event loop for object detector response worker')
         while not self.kill_process:
             # block until the MessageWorker puts something in the
             # request_q
@@ -152,7 +168,7 @@ class ObjectDetectoResponseWorker(Process):
 
             # construct message that we should pass back to user based on
             # detected objects
-            msg = self.build_msg(detected_objects)
+            msg = self.build_msg(obj_to_find, detected_objects)
 
             # add msg to message_q
             self.message_q.put(msg)
@@ -169,13 +185,13 @@ class ObjectDetectoResponseWorker(Process):
 	else:
 	    mid_p = (detected_objects.get('person')[1] \
 			+ detected_objects.get('person')[3])/2
-	    mid_o = (detected_objects.get(obj)[1] \
-		    + detected_objects.get(obj)[1])/2
+	    mid_o = (detected_objects.get(obj_to_find)[1] \
+		    + detected_objects.get(obj_to_find)[1])/2
 	    if mid_p < mid_o:
 		msg = obj_to_find + ' is to your left'
 	    else:
 		msg = obj_to_find + ' is to your right'
-
+        print msg
         return msg
 
     def load_stationary_objects(self):
