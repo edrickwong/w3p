@@ -14,8 +14,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.expanduser('~'), 'w3p'))
 
 from object_detector_app.object_detect_single import detect_objects_no_vis
-from training.utils.image_utils import ImageContainer, build_labelled_csv_dictionary, ImageObject,
-                                       TRAIN_FOLDER
+from training.utils.image_utils import ImageContainer, build_labelled_csv_dictionary, ImageObject, TRAIN_FOLDER
 
 DETECT_THRESHOLD = 0.5
 IOU_THRESHOLD = 0.3
