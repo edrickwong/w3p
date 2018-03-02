@@ -31,15 +31,20 @@ def main():
                         default=1, help='Number of workers.')
     parser.add_argument('-q-size', '--queue-size', dest='queue_size', type=int,
                         default=10, help='Size of the queue.')
-    parser.add_argument('-vis','--visualize', type=bool,
-                        default=True, help='Object to search for.')
-    parser.add_argument('-d', '--debug', type=bool,
-                        default=False, help='if in debug mode or not.')
+    parser.add_argument('--visualize', dest='visualize',
+                        action='store_true', help='show visualization')
+    parser.add_argument('--no-visualize', dest='visualize',
+                        action='store_false', help='do not show visualiation')
+    parser.add_argument('--debug', dest='debug',
+                        action='store_true', help='show visualization')
+    parser.add_argument('--no-debug', dest='debug',
+                        action='store_false', help='do not show visualiation')
+    parser.set_defaults(debug=False)
+    parser.set_defaults(visualize=True)
     args = parser.parse_args()
 
     # boolean to determine if inference should be visualized
     visualize_output = args.visualize
-
     logger = multiprocessing.log_to_stderr()
     if args.debug:
         logger.setLevel(multiprocessing.SUBDEBUG)
