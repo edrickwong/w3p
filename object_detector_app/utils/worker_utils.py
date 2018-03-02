@@ -7,6 +7,7 @@ import time
 from defaults import *
 from multiprocessing import Queue, Pool, Process
 from object_detector_utils import ObjectDetector
+from utils.app_utils import WebcamVideoStream
 
 # logger object for more succicnt output
 logger = multiprocessing.get_logger()
@@ -94,6 +95,34 @@ class MessageWorker(Process):
                 time.sleep(1)
 
 
+class InputFrameWorker(Process):
+    '''
+        TODO: Add comments
+    '''
+    def __init__(self, video_source, width, height, img_input_q,
+                 *args, **kwargs):
+        super(InputFrameWorker, self).__init__(*args, **kwargs)
+        self.img_input_q = img_input_q
+        logger.debug('Setting up video capture stream')
+        self._stream = cv2.VideoCapture(video_source)
+        self._stream.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        self._stream.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+        self.test_stream()
+
+        self.kill_process = False
+
+    def run(self):
+        logger.debug('Entering event loop for input worker')
+        while not self.kill_process:
+            _, frame = self._stream.read()
+            self.img_input_q.put(frame)
+        self._video_capture.stop()
+
+    def test_stream(self):
+        captured, frame = self._stream.read()
+        if not captured:
+            logger.debug('Unable to capture stream')
+
 class OutputImageStreamWorker(Process):
     '''
         TODO: Add comments
@@ -121,6 +150,7 @@ class OutputImageStreamWorker(Process):
             frame = self.input_img_q.get()
 	    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
+            logger.debug('got input frame')
             # do inference for frame capture
 	    out_image = self._object_detector.detect_objects_visualize(frame_rgb)
             self.output_img_q.put(frame_rgb)

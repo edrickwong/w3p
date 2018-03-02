@@ -7,13 +7,13 @@ import numpy as np
 import socket
 import tensorflow as tf
 
-from utils.app_utils import FPS, WebcamVideoStream
 from utils.misc_utils import is_using_tensorflow_gpu
 # I know the below is bad practice (importing *)
 # TODO: Right a proper configManager to load in defaults
 from utils.defaults import *
 from utils.worker_utils import MessageWorker, OutputImageStreamWorker, \
-                               ObjectDetectoResponseWorker
+                               ObjectDetectoResponseWorker, \
+                               InputFrameWorker
 
 from multiprocessing import Queue, Pool, Process
 from object_detection.utils import label_map_util
@@ -72,6 +72,13 @@ def main():
     request_q = Queue(maxsize=args.queue_size)
     message_q = Queue(maxsize=args.queue_size)
 
+    # input stream worker
+    input_worker = InputFrameWorker(args.video_source,
+                                    args.width,
+                                    args.height,
+                                    input_q)
+    input_worker.start()
+
     # output stream workers, required to visualize inference on the
     # fly
     if visualize_output:
@@ -87,22 +94,14 @@ def main():
     response_worker = ObjectDetectoResponseWorker(input_q, request_q, message_q)
     response_worker.start()
 
-    # Video capture continuously
-    video_capture = WebcamVideoStream(src=args.video_source,
-                                      width=args.width,
-                                      height=args.height).start()
-
     # Parent event loop
     logger.debug('Entering parent process event loop')
     while True:
         try:
-            frame = video_capture.read()
-            input_q.put(frame)
-
             if visualize_output:
                 output_rgb = cv2.cvtColor(output_q.get(), cv2.COLOR_RGB2BGR)
                 cv2.imshow('Video', output_rgb)
-
+                logger.warning('Showing output')
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
@@ -111,6 +110,8 @@ def main():
 
     # TODO: Make kill process a multiproc semaphore/lock/signal that all the
     # processes can just interface with
+    input_worker.kill_process = True
+    input_worker.join()
     msg_worker.kill_process = True
     msg_worker.join()
     response_worker.kill_process = True
@@ -125,8 +126,6 @@ def main():
         for worker in output_image_stream_workers:
             worker.join()
 
-    # Cleanup remaining resources
-    video_capture.stop()
     cv2.destroyAllWindows()
 
 
