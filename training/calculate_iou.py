@@ -8,6 +8,7 @@ from object_detection.utils import label_map_util
 import numpy as np
 import cv2
 import operator
+import pdb 
 
 # HACK IN PYTHONPATH SO WE CAN USE object_detector_utils
 import sys
@@ -16,18 +17,18 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~'), 'w3p'))
 from object_detector_app.object_detect_single import detect_objects_no_vis
 from training.utils.image_utils import ImageContainer, build_labelled_csv_dictionary, ImageObject, TRAIN_FOLDER
 
-DETECT_THRESHOLD = 0.5
+DETECT_THRESHOLD = 0.3
 IOU_THRESHOLD = 0.3
-IMAGE = "pitcher"
+IMAGE = "images"
 IMAGES_FOLDER = os.path.join(TRAIN_FOLDER, IMAGE)
-CSV_TEST_FILE = os.path.join(TRAIN_FOLDER, 'test_labels.csv')
-MODEL_NAME = 'ssd_mobilenet_pitcher'
+CSV_TEST_FILE = os.path.join(TRAIN_FOLDER, 'images.csv')
+MODEL_NAME = 'model1'
 PATH_TO_CKPT = os.path.join(TRAIN_FOLDER, MODEL_NAME, 'frozen_inference_graph.pb')
 #MODEL_NAME = 'ssd_mobilenet_v1_coco_11_06_2017'
 #PATH_TO_CKPT = os.path.join('/Users/lindawang/w3p/object_detector_app/object_detection/ssd_mobilenet_v1_coco_11_06_2017', 'frozen_inference_graph.pb')
 PATH_TO_LABELS = os.path.join(TRAIN_FOLDER, 'label_map.pbtxt')
 
-NUM_CLASSES = 1
+NUM_CLASSES = 4
 
 # Loading label map
 label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
@@ -81,6 +82,7 @@ def main():
 
     csv_test_dict = build_labelled_csv_dictionary(CSV_TEST_FILE)
     for image in generator_for_test_image(csv_test_dict):
+        pdb.set_trace()
         boxes, scores, classes, num_detections = detect_objects_no_vis(image.image, sess, detection_graph)
         # for scores greater than threshold
         for i in range(len(scores[0])):
@@ -117,11 +119,10 @@ def main():
                 else:
                     FP[max_iouClass] += 1
 
-        #image.draw_boxes()
-        #cv2.imshow('original', image.image)
-        #cv2.waitKey(0)
-        #cv2.destroyAllWindows()
-        #import pdb ; pdb.set_trace()
+        image.draw_boxes()
+        cv2.imshow('original', image.image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
     # mean average precision
     mean_ap = 0
