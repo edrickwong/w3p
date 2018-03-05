@@ -53,5 +53,5 @@ class ReferenceObject(ImageObject):
                                          color='white',
                                          thickness=6,
                                          display_str_list=(self.obj_type, ),
-                                         use_normalized_coordinates=False)
+                                         use_normalized_coordinates=True)
 
