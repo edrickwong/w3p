@@ -1,8 +1,13 @@
-from cv2 import *
+import cv2
 
 def main():
-    cam = VideoCapture(0)
-    s, img = cam.read()
+    cam = cv2.VideoCapture(0)
+    sa, img = cam.read()
+    import pdb ; pdb.set_trace()
+    cv2.imshow('capture', img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
     if s:
 	imwrite("stuff.jpg", img)
 
