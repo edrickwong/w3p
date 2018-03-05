@@ -14,7 +14,7 @@ assist = Assistant(app, '/')
 
 @assist.action('greeting')
 def greet_and_start():
-    speech = "Hey what's up hello?"
+    speech = "Hi, how can I help you?"
     return ask(speech)
 
 
