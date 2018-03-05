@@ -28,3 +28,15 @@ training/graph.pbtxt
 training/checkpoint
 training/model.*
 training/events.*
+training/backup
+training/bottle
+training/bowl
+training/cup
+training/images
+training/kettle
+training/.ipynb_checkpoints
+training/bottle.*
+training/bowl.*
+training/cup.*
+training/kettle.*
+training/train.record
