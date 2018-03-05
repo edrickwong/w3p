@@ -6,7 +6,6 @@ from collections import defaultdict
 
 BLUE = (0,0,200)
 RED = (200,0,0)
-WHITE = (255, 255, 255)
 
 ITEMS = ["kettle", "bottle", "bowl", "cup"]
 
@@ -136,34 +135,11 @@ class ImageObject(object):
 
     @property
     def left_corner(self):
-        # top left corner
         return (self.xmin, self.ymin)
 
     @property
     def right_corner(self):
-        # top right corner
         return (self.xmax, self.ymax)
-
-    @property
-    def top_left_corner(self):
-        return self.left_corner
-
-    @property
-    def top_right_corner(self):
-        return (self.xmax, self.ymin)
-
-    @property
-    def bottom_left_corner(self):
-        return (self.xmin, self.ymax)
-
-    @property
-    def bottom_right_corner(self):
-        return self.right_corner
-
-    @property
-    def midpoint(self):
-        return ((self.xmax - self.xmin)/2,
-                (self.ymax - self.ymin)/2)
 
     def __eq__(self, obj):
         return self.obj_type == obj.obj_type and self.xmin == obj.xmin \

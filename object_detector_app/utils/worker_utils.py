@@ -8,7 +8,6 @@ from defaults import *
 from multiprocessing import Queue, Pool, Process
 from object_detector_utils import ObjectDetector
 from utils.app_utils import WebcamVideoStream
-from reference_objects_utils import ReferenceObjectsHelper
 
 # logger object for more succicnt output
 logger = multiprocessing.get_logger()
@@ -137,15 +136,12 @@ class OutputImageStreamWorker(Process):
         # SO CAN'T INITIALIZE HERE, HAVE TO INIT AFTER THE PARENT
         # HAS FORKED INTO CHILD...
         self._object_detector = None
-        self._reference_object_helper = None
 
         # Bool to kill event loop
         self.kill_process = False
 
     def run(self):
-        # encapsulate the necessary helper objects
         self._object_detector = ObjectDetector()
-        self._ref_obj_helper = ReferenceObjectsHelper()
 
         # Enter Event loop for worker
         while not self.kill_process:
@@ -157,8 +153,7 @@ class OutputImageStreamWorker(Process):
             logger.debug('got input frame')
             # do inference for frame capture
 	    out_image = self._object_detector.detect_objects_visualize(frame_rgb)
-            self._ref_obj_helper.visualize_reference_objects(out_image)
-            self.output_img_q.put(out_image)
+            self.output_img_q.put(frame_rgb)
 
         # should do with __enter__ and __exit__ methods, but w.e for now
         self._object_detector.cleanup()
@@ -185,7 +180,6 @@ class ObjectDetectoResponseWorker(Process):
     def run(self):
 	# Load object detector after parent process forks
         self._object_detector = ObjectDetector()
-        self._ref_obj_helper = ReferenceObjectsHelper()
 
         # Enter Event loop for worker
         logger.debug('Entering event loop for object detector response worker')
@@ -214,11 +208,6 @@ class ObjectDetectoResponseWorker(Process):
     def build_msg(self, obj_to_find, detected_objects):
         msg = ''
 
-        '''
-            self.reference_objects has a list of
-            ReferenceObject items that contain hard coded
-            objects
-        '''
 	if 'person' not in detected_objects:
             msg = 'Cannot locate user.'
 	elif obj_to_find not in detected_objects:
@@ -235,3 +224,5 @@ class ObjectDetectoResponseWorker(Process):
         print msg
         return msg
 
+    def load_stationary_objects(self):
+        pass
