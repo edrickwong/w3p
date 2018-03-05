@@ -22,7 +22,6 @@ class ObjectDetector(object):
 
         self._detection_graph = None
         self._sess = None
-
         self.load_tf_graph()
 
     def detect_objects_visualize(self, image_np):
