@@ -19,6 +19,7 @@ pids
 
 # Virtual envs
 venv/*
+venv_cpu/*
 
 .idea/*
 .DS_Store
