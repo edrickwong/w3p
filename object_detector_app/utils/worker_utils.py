@@ -103,25 +103,30 @@ class InputFrameWorker(Process):
                  *args, **kwargs):
         super(InputFrameWorker, self).__init__(*args, **kwargs)
         self.img_input_q = img_input_q
-        logger.debug('Setting up video capture stream')
-        self._stream = cv2.VideoCapture(video_source)
-        self._stream.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-        self._stream.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-        self.test_stream()
-
+        #self.test_stream()
+        self.video_source = video_source
+        self.width = width
+        self.height = height
         self.kill_process = False
 
     def run(self):
         logger.debug('Entering event loop for input worker')
+        self._stream = cv2.VideoCapture(self.video_source)
+        self._stream.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+        self._stream.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+
         while not self.kill_process:
-            _, frame = self._stream.read()
-            self.img_input_q.put(frame)
-        self._video_capture.stop()
+            ret, frame = self._stream.read()
+            if ret:
+                self.img_input_q.put(frame)
+            else:
+                logger.warning('Unable to grab input frame')
 
     def test_stream(self):
         captured, frame = self._stream.read()
         if not captured:
             logger.debug('Unable to capture stream')
+
 
 class OutputImageStreamWorker(Process):
     '''
