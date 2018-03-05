@@ -14,7 +14,7 @@ if 'justin' in home_folder:
     TRAIN_FOLDER = os.path.join(home_folder, 'Github', 'w3p', 'training')
 else:
     TRAIN_FOLDER = os.path.join(home_folder, 'w3p', 'training')
-IMAGES_FOLDER = [os.path.join(TRAIN_FOLDER, item) for item in ITEMS[1:]]
+IMAGES_FOLDER = [os.path.join(TRAIN_FOLDER, item) for item in ITEMS]
 
 def generate_random_rgb_color():
     return (randint(0,255), randint(0,255), randint(0,255))
