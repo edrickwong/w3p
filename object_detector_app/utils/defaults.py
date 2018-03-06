@@ -38,3 +38,10 @@ ALLOWED_CLASSES = ['person','bottle','knife','spoon','fork','cup','bowl','dog']
 TCP_IP = '127.0.0.1'
 TCP_PORT = 1315
 BUFFER_SIZE = 1024
+
+
+###
+##  Reference landmarks file
+###
+REFERENCE_OBJECTS_FILE = os.path.join(APP_FOLDER, 'reference_objects.yaml')
+
