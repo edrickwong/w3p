@@ -1,21 +1,36 @@
 import cv2
 import csv
 import os
+import sys
+
 from random import randint
 from collections import defaultdict
 
 BLUE = (0,0,200)
 RED = (200,0,0)
+GREEN = (0, 200, 0)
+YELLOW = (200, 200, 0)
 WHITE = (255, 255, 255)
 
 ITEMS = ["kettle", "bottle", "bowl", "cup"]
+COLOR_ITEMS = {"kettle": 'red',
+	       "bottle": 'blue',
+	       "bowl": 'green',
+	       "cup": 'yellow'}
 
 home_folder = os.path.expanduser('~')
 if 'justin' in home_folder:
-    TRAIN_FOLDER = os.path.join(home_folder, 'Github', 'w3p', 'training')
+    W3P = os.path.join(home_folder, 'Github', 'w3p')
 else:
-    TRAIN_FOLDER = os.path.join(home_folder, 'w3p', 'training')
-IMAGES_FOLDER = [os.path.join(TRAIN_FOLDER, item) for item in ITEMS[1:]]
+    W3P = os.path.join(home_folder, 'w3p')
+
+APP_FOLDER = os.path.join(W3P, 'object_detector_app')
+TRAIN_FOLDER = os.path.join(W3P, 'training')
+IMAGES_FOLDER = [os.path.join(TRAIN_FOLDER, item) for item in ITEMS]
+sys.path.insert(0, W3P)
+sys.path.insert(0, APP_FOLDER)
+
+from object_detection.utils.visualization_utils import draw_bounding_box_on_image_array
 
 def generate_random_rgb_color():
     return (randint(0,255), randint(0,255), randint(0,255))
@@ -109,17 +124,14 @@ class ImageContainer(object):
         if not self.detected_objects:
             for box in self.labelled_objects:
                 self.image_updated = True
-                cv2.rectangle(self.image, box.left_corner, box.right_corner,
-                              generate_random_rgb_color(), thickness)
+                box.draw_bounding_box(self.image)
         else:
             #print 'here'
             for box in self.labelled_objects:
                 self.image_updated = True
-                cv2.rectangle(self.image, box.left_corner, box.right_corner, (0,0,255), thickness)
+		box.draw_bounding_box(self.image)
             for box in self.detected_objects:
-                self.image_updated = True
-                print box.left_corner
-                cv2.rectangle(self.image, box.left_corner, box.right_corner, (255,0,0), thickness)
+		box.draw_bounding_box(self.image)
 
 
 class ImageObject(object):
@@ -245,6 +257,17 @@ class ImageObject(object):
                                    self.xmax,
                                    self.ymax)
 
+    def draw_bounding_box(self, img):
+	color = COLOR_ITEMS.get(self.obj_type, 'white')
+        draw_bounding_box_on_image_array(img,
+                                         self.ymin,
+                                         self.xmin,
+                                         self.ymax,
+                                         self.xmax,
+                                         color=color,
+                                         thickness=6,
+                                         display_str_list=(self.obj_type, ),
+                                         use_normalized_coordinates=False)
 
 def build_labelled_csv_dictionary(csv_file_name):
     res = defaultdict(list)
