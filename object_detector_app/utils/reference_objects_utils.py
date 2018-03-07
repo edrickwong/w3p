@@ -37,12 +37,16 @@ class ReferenceObject(ImageObject):
             real_size = real_size of the object
             real_width = real_width of the object
     '''
+    WIDTH = 640
+    HEIGHT = 480
+
     def __init__(self, *args, **kwargs):
         # Feeling lazy af right now and violating one of the zens of
         # python... but going to do initalization implicitly rather
         # than explicitly
         for k, v in kwargs.iteritems():
             setattr(self, k, v)
+
 
     def draw_bounding_box(self, img):
         draw_bounding_box_on_image_array(img,
