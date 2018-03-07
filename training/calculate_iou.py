@@ -18,11 +18,11 @@ from object_detector_app.object_detect_single import detect_objects_no_vis
 from training.utils.image_utils import ImageContainer, build_labelled_csv_dictionary, ImageObject, TRAIN_FOLDER
 
 DETECT_THRESHOLD = 0.3
-IOU_THRESHOLD = 0.3
+IOU_THRESHOLD = 0.6
 IMAGE = "images"
 IMAGES_FOLDER = os.path.join(TRAIN_FOLDER, IMAGE)
 CSV_TEST_FILE = os.path.join(TRAIN_FOLDER, 'images.csv')
-MODEL_NAME = 'model1'
+MODEL_NAME = 'model_2018_03_06'
 PATH_TO_CKPT = os.path.join(TRAIN_FOLDER, MODEL_NAME, 'frozen_inference_graph.pb')
 #MODEL_NAME = 'ssd_mobilenet_v1_coco_11_06_2017'
 #PATH_TO_CKPT = os.path.join('/Users/lindawang/w3p/object_detector_app/object_detection/ssd_mobilenet_v1_coco_11_06_2017', 'frozen_inference_graph.pb')
@@ -82,7 +82,7 @@ def main():
 
     csv_test_dict = build_labelled_csv_dictionary(CSV_TEST_FILE)
     for image in generator_for_test_image(csv_test_dict):
-        pdb.set_trace()
+        #pdb.set_trace()
         boxes, scores, classes, num_detections = detect_objects_no_vis(image.image, sess, detection_graph)
         # for scores greater than threshold
         for i in range(len(scores[0])):
@@ -119,17 +119,20 @@ def main():
                 else:
                     FP[max_iouClass] += 1
 
-        image.draw_boxes()
-        cv2.imshow('original', image.image)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        #image.draw_boxes()
+        #cv2.imshow('original', image.image)
+        #cv2.waitKey(0)
+        #cv2.destroyAllWindows()
 
     # mean average precision
     mean_ap = 0
     # average precision for each class
     for i in range(len(category_index)):
         category = str(category_index[i+1]['name'])
-        class_precision[category] = TP[category] / (TP[category] + FP[category]) * 100
+        if TP[category] == 0 and FP[category] == 0:
+            class_precision[category] = 0
+        else:
+            class_precision[category] = TP[category] / float(TP[category] + FP[category]) * 100
         mean_ap += class_precision[category]
 
     mean_ap = mean_ap / float(len(category_index))
