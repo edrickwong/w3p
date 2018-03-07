@@ -43,15 +43,3 @@ class ReferenceObject(ImageObject):
         # than explicitly
         for k, v in kwargs.iteritems():
             setattr(self, k, v)
-
-    def draw_bounding_box(self, img):
-        draw_bounding_box_on_image_array(img,
-                                         self.ymin,
-                                         self.xmin,
-                                         self.ymax,
-                                         self.xmax,
-                                         color='white',
-                                         thickness=6,
-                                         display_str_list=(self.obj_type, ),
-                                         use_normalized_coordinates=False)
-
