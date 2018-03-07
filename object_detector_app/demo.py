@@ -15,8 +15,7 @@ from utils.worker_utils import MessageWorker, OutputImageStreamWorker, \
                                ObjectDetectoResponseWorker, \
                                InputFrameWorker
 
-from multiprocessing import Queue, Pool, Process, Value
-from ctypes import c_float
+from multiprocessing import Queue, Pool, Process
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 

@@ -17,14 +17,8 @@ class ReferenceObjectsHelper(object):
         SIGH.. I hate multiproc in 2.7 -_-
     '''
     def __init__(self, width, height):
-        try:
-            self.width = width.value
-            self.height = height.value
-        except Exception as e:
-            logger.warning('Expecting width and height to be ctype objects.' \
-                           ' They are of type %s.' %(type(width)))
-            self.width = width
-            self.height = height
+        self.width = width
+        self.height = height
 
         self.reference_objects = []
         self.load_reference_objects()
