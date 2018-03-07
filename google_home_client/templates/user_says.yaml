@@ -36,3 +36,11 @@ unknown-object:
   -
   Events:
   -
+
+end:
+  UserSays:
+  - thanks Google
+  - thank you Google
+  - stop
+  - that's enough
+  - end test
