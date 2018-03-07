@@ -13,6 +13,7 @@ from reference_objects_utils import ReferenceObjectsHelper
 # logger object for more succicnt output
 logger = multiprocessing.get_logger()
 
+
 class MessageWorker(Process):
     '''
         TODO: add comments, its 2AM, i will add comments tomorrow
@@ -100,21 +101,22 @@ class InputFrameWorker(Process):
     '''
         TODO: Add comments
     '''
-    def __init__(self, video_source, width, height, img_input_q,
+    def __init__(self, img_input_q, video_source,
                  *args, **kwargs):
         super(InputFrameWorker, self).__init__(*args, **kwargs)
         self.img_input_q = img_input_q
         #self.test_stream()
         self.video_source = video_source
-        self.width = width
-        self.height = height
+
+        # kill switch
         self.kill_process = False
 
     def run(self):
         logger.debug('Entering event loop for input worker')
         self._stream = cv2.VideoCapture(self.video_source)
-        self._stream.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
-        self._stream.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+        # OpenCV doesnt respect these width/height parameters
+        #self._stream.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+        #self._stream.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
 
         while not self.kill_process:
             ret, frame = self._stream.read()
@@ -133,7 +135,8 @@ class OutputImageStreamWorker(Process):
     '''
         TODO: Add comments
     '''
-    def __init__(self, img_input_q, img_output_q, *args, **kwargs):
+    def __init__(self, img_input_q, img_output_q, width, height,
+                 *args, **kwargs):
         super(OutputImageStreamWorker, self).__init__(*args, **kwargs)
         self.input_img_q = img_input_q
         self.output_img_q = img_output_q
@@ -144,13 +147,17 @@ class OutputImageStreamWorker(Process):
         self._object_detector = None
         self._reference_object_helper = None
 
+        # variables needed for normalization
+        self.width = width
+        self.height = height
+
         # Bool to kill event loop
         self.kill_process = False
 
     def run(self):
         # encapsulate the necessary helper objects
         self._object_detector = ObjectDetector()
-        self._ref_obj_helper = ReferenceObjectsHelper()
+        self._ref_obj_helper = ReferenceObjectsHelper(self.width, self.height)
 
         # Enter Event loop for worker
         while not self.kill_process:
@@ -173,7 +180,9 @@ class ObjectDetectoResponseWorker(Process):
     '''
         TODO: Add comments
     '''
-    def __init__(self, img_input_q, request_q, message_q, *args, **kwargs):
+    def __init__(self, img_input_q, request_q, message_q,
+                 width, height,
+                 *args, **kwargs):
         super(ObjectDetectoResponseWorker, self).__init__(*args, **kwargs)
         self.input_img_q = img_input_q
         self.request_q = request_q
@@ -184,13 +193,17 @@ class ObjectDetectoResponseWorker(Process):
         # HAS FORKED INTO CHILD...
         self._object_detector = None
 
+        # variables needed for normaliziation
+        self.width = width
+        self.height = height
+
         # Bool to kill event loop
         self.kill_process = False
 
     def run(self):
 	# Load object detector after parent process forks
         self._object_detector = ObjectDetector()
-        self._ref_obj_helper = ReferenceObjectsHelper()
+        self._ref_obj_helper = ReferenceObjectsHelper(self.width, self.height)
 
         # Enter Event loop for worker
         logger.debug('Entering event loop for object detector response worker')
