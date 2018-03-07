@@ -4,6 +4,69 @@
         "fallbackIntent": false, 
         "responses": [
             {
+                "action": "handle_unknown_object", 
+                "resetContexts": false, 
+                "affectedContexts": [], 
+                "messages": [], 
+                "parameters": []
+            }
+        ], 
+        "contexts": [], 
+        "auto": true, 
+        "id": "d5ea2e24-9c05-4d63-a937-c5275cb15116", 
+        "priority": 500000, 
+        "userSays": [
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "where is the", 
+                        "userDefined": false
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "i can't find my", 
+                        "userDefined": false
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "do you see my", 
+                        "userDefined": false
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "can you help me find my", 
+                        "userDefined": false
+                    }
+                ]
+            }
+        ], 
+        "webhookUsed": true, 
+        "webhookForSlotFilling": true, 
+        "events": [], 
+        "name": "unknown-object"
+    }, 
+    {
+        "templates": [], 
+        "fallbackIntent": false, 
+        "responses": [
+            {
                 "action": "greet_and_start", 
                 "resetContexts": false, 
                 "affectedContexts": [], 
