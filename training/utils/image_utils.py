@@ -22,10 +22,6 @@ home_folder = os.path.expanduser('~')
 if 'justin' in home_folder:
     W3P = os.path.join(home_folder, 'Github', 'w3p')
 else:
-<<<<<<< HEAD
-    TRAIN_FOLDER = os.path.join(home_folder, 'w3p', 'training')
-IMAGES_FOLDER = [os.path.join(TRAIN_FOLDER, item) for item in ITEMS]
-=======
     W3P = os.path.join(home_folder, 'w3p')
 
 APP_FOLDER = os.path.join(W3P, 'object_detector_app')
@@ -35,7 +31,6 @@ sys.path.insert(0, W3P)
 sys.path.insert(0, APP_FOLDER)
 
 from object_detection.utils.visualization_utils import draw_bounding_box_on_image_array
->>>>>>> 50dffd3be37125d85e48b621c1b8350670fa6bc7
 
 def generate_random_rgb_color():
     return (randint(0,255), randint(0,255), randint(0,255))
