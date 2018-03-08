@@ -18,7 +18,7 @@ from object_detector_app.object_detect_single import detect_objects_no_vis
 from training.utils.image_utils import ImageContainer, build_labelled_csv_dictionary, ImageObject, TRAIN_FOLDER
 
 DETECT_THRESHOLD = 0.3
-IOU_THRESHOLD = 0.6
+IOU_THRESHOLD = 0.3
 IMAGE = "images"
 IMAGES_FOLDER = os.path.join(TRAIN_FOLDER, IMAGE)
 CSV_TEST_FILE = os.path.join(TRAIN_FOLDER, 'images.csv')
@@ -82,7 +82,6 @@ def main():
 
     csv_test_dict = build_labelled_csv_dictionary(CSV_TEST_FILE)
     for image in generator_for_test_image(csv_test_dict):
-        #pdb.set_trace()
         boxes, scores, classes, num_detections = detect_objects_no_vis(image.image, sess, detection_graph)
         # for scores greater than threshold
         for i in range(len(scores[0])):
@@ -119,10 +118,11 @@ def main():
                 else:
                     FP[max_iouClass] += 1
 
-        #image.draw_boxes()
-        #cv2.imshow('original', image.image)
-        #cv2.waitKey(0)
-        #cv2.destroyAllWindows()
+        image.draw_boxes()
+        cv2.imshow('original', image.image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        pdb.set_trace()
 
     # mean average precision
     mean_ap = 0
