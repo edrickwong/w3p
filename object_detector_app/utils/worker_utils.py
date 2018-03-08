@@ -135,7 +135,7 @@ class OutputImageStreamWorker(Process):
     '''
         TODO: Add comments
     '''
-    def __init__(self, img_input_q, img_output_q, width, height,
+    def __init__(self, img_input_q, img_output_q,
                  *args, **kwargs):
         super(OutputImageStreamWorker, self).__init__(*args, **kwargs)
         self.input_img_q = img_input_q
@@ -145,11 +145,7 @@ class OutputImageStreamWorker(Process):
         # SO CAN'T INITIALIZE HERE, HAVE TO INIT AFTER THE PARENT
         # HAS FORKED INTO CHILD...
         self._object_detector = None
-        self._reference_object_helper = None
-
-        # variables needed for normalization
-        self.width = width
-        self.height = height
+        self._ref_obj_helper = None
 
         # Bool to kill event loop
         self.kill_process = False
@@ -157,13 +153,24 @@ class OutputImageStreamWorker(Process):
     def run(self):
         # encapsulate the necessary helper objects
         self._object_detector = ObjectDetector()
-        self._ref_obj_helper = ReferenceObjectsHelper(self.width, self.height)
+        self._ref_obj_helper = None
 
         # Enter Event loop for worker
         while not self.kill_process:
             # grab most recent frame img_input_q and convert to RGB
             # as expected by model
             frame = self.input_img_q.get()
+
+            # HACK:: Anshuman 03/08/2019
+            # We need the dimensions of the frames, since OpenCV can't actually
+            # set the width/height for the camera input across all cameras.
+            # So we are going to look at the input frame to determine the size
+            # needed, so we can pass in normalized coordinates but work
+            # with denormalized/real coordinates.
+            if not self._ref_obj_helper:
+                height, width, _ = frame.shape
+                self._ref_obj_helper = ReferenceObjectsHelper(height, width)
+
 	    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             logger.debug('got input frame')
@@ -181,7 +188,6 @@ class ObjectDetectoResponseWorker(Process):
         TODO: Add comments
     '''
     def __init__(self, img_input_q, request_q, message_q,
-                 width, height,
                  *args, **kwargs):
         super(ObjectDetectoResponseWorker, self).__init__(*args, **kwargs)
         self.input_img_q = img_input_q
@@ -192,10 +198,7 @@ class ObjectDetectoResponseWorker(Process):
         # SO CAN'T INITIALIZE HERE, HAVE TO INIT AFTER THE PARENT
         # HAS FORKED INTO CHILD...
         self._object_detector = None
-
-        # variables needed for normaliziation
-        self.width = width
-        self.height = height
+        self._ref_obj_helper = None
 
         # Bool to kill event loop
         self.kill_process = False
@@ -203,7 +206,6 @@ class ObjectDetectoResponseWorker(Process):
     def run(self):
 	# Load object detector after parent process forks
         self._object_detector = ObjectDetector()
-        self._ref_obj_helper = ReferenceObjectsHelper(self.width, self.height)
 
         # Enter Event loop for worker
         logger.debug('Entering event loop for object detector response worker')
@@ -215,6 +217,17 @@ class ObjectDetectoResponseWorker(Process):
             # grab most recent frame img_input_q and convert to RGB
             # as expected by model
             frame = self.input_img_q.get()
+
+            # HACK:: Anshuman 03/08/2019
+            # We need the dimensions of the frames, since OpenCV can't actually
+            # set the width/height for the camera input across all cameras.
+            # So we are going to look at the input frame to determine the size
+            # needed, so we can pass in normalized coordinates but work
+            # with denormalized/real coordinates.
+            if not self._ref_obj_helper:
+                height, width, _ = frame.shape
+                self._ref_obj_helper = ReferenceObject(width, height)
+
 	    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             # do inference for frame capture
