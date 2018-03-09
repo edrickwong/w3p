@@ -169,7 +169,7 @@ class OutputImageStreamWorker(Process):
             # with denormalized/real coordinates.
             if not self._ref_obj_helper:
                 height, width, _ = frame.shape
-                self._ref_obj_helper = ReferenceObjectsHelper(height, width)
+                self._ref_obj_helper = ReferenceObjectsHelper(width, height)
 
 	    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
