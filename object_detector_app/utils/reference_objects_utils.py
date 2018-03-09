@@ -1,4 +1,5 @@
 import cv2
+import time
 import yaml
 
 from defaults import *
@@ -6,6 +7,8 @@ from training.utils.image_utils import ImageObject, WHITE
 from object_detection.utils.visualization_utils import draw_bounding_box_on_image_array
 from multiprocessing import get_logger
 from ctypes import c_float
+from threading import Thread
+from os.path import getmtime
 
 logger = get_logger()
 
@@ -16,6 +19,8 @@ class ReferenceObjectsHelper(object):
         and Process don't play well together..
         SIGH.. I hate multiproc in 2.7 -_-
     '''
+    CHECK_INTERVAL = 5
+
     def __init__(self, width, height):
         self.width = width
         self.height = height
@@ -23,7 +28,14 @@ class ReferenceObjectsHelper(object):
         self.reference_objects = []
         self.load_reference_objects()
 
-    def load_reference_objects(self):
+        self._worker_thread = Thread(target=self.check_for_ref_file_change)
+        self._worker_thread.daemon = True
+        self._worker_thread.start()
+
+    def load_reference_objects(self,load_fresh=False):
+        if load_fresh:
+              self.reference_objects = []
+            
         for item in yaml.load(open(REFERENCE_OBJECTS_FILE)):
             self.reference_objects.append(ReferenceObject(self.width,
                                                           self.height,
@@ -37,6 +49,19 @@ class ReferenceObjectsHelper(object):
         for ref_obj in self.reference_objects:
             ref_obj.draw_bounding_box(img)
         return img
+
+    def check_for_ref_file_change(self):
+        # enter event loop for this guy
+        last_mtime = getmtime(REFERENCE_OBJECTS_FILE)
+        while True:
+            cur_mtime = getmtime(REFERENCE_OBJECTS_FILE)
+            # rely on modified time which according to python docs is a cross
+            # platform call to check if we need to reload the objects
+            if cur_mtime != last_mtime:
+                logger.warning('Detected a change in reference file. Reloading file')
+                self.load_reference_objects(load_fresh=True)
+                last_mtime = cur_mtime
+            time.sleep(self.CHECK_INTERVAL)
 
 
 class ReferenceObject(ImageObject):
