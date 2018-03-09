@@ -2,14 +2,13 @@
   real_height: 40
   real_width: 50
   xmin: 10
-  xmax: 150
+  xmax: 200
   ymin: 30
   ymax: 500
 - obj_type: "table"
   real_height: 40
   real_width: 50
-  xmin: 340
-  xmax: 600
+  xmin: 600
+  xmax: 800
   ymin: 200
   ymax: 300
-

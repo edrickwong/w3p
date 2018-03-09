@@ -222,6 +222,10 @@ class ObjectDetectoResponseWorker(Process):
 
     def closest_left_edge_distance(self,obj_xmin, obj_xmax,ref_xmax):
         #check if object is infront of reference
+        print('left edge numbers')
+        print('obj_xmin :' + str(obj_xmin))
+        print('obj_xmax: ' + str(obj_xmax))
+        print('ref_xmax: ' + str(ref_xmax))
         if obj_xmin <= ref_xmax <= obj_xmax:
             return 0
         else:
@@ -235,6 +239,10 @@ class ObjectDetectoResponseWorker(Process):
             return 0
         else:
             #if reference is right of object, should return negative distance
+            print('right edge numbers')
+            print('obj_xmin: ' + str(obj_xmin))
+            print('obj_xmax: ' + str(obj_xmax))
+            print('ref_xmax: ' + str(ref_xmin))
             print(ref_xmin-obj_xmax)
             return obj_xmax-ref_xmin
 
