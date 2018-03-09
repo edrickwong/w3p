@@ -139,6 +139,7 @@ class InputFrameWorker(Process):
         #self._stream.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
 
         while not self.kill_process:
+            logger.warning(self.kill_process)
             ret, frame = self._stream.read()
             if ret:
                 self.img_input_q.put(frame)
