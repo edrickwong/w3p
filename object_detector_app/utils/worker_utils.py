@@ -7,12 +7,12 @@ import time
 from defaults import *
 from multiprocessing import Queue, Pool, Process
 from object_detector_utils import ObjectDetector
+from profiler_utils import Timer
 from utils.app_utils import WebcamVideoStream
 from reference_objects_utils import ReferenceObjectsHelper
 
 # logger object for more succicnt output
 logger = multiprocessing.get_logger()
-
 
 class MessageWorker(Process):
     '''
@@ -23,6 +23,12 @@ class MessageWorker(Process):
         self.tcp_ip = kwargs.pop('tcp_ip', TCP_IP)
         self.tcp_port = kwargs.pop('tcp_port', TCP_PORT)
         self.buffer_size = kwargs.pop('buffer_size', BUFFER_SIZE)
+
+        # check if profiler has been specified
+        self.profile = kwargs.pop('profile', False)
+        if self.profile:
+            logger.warning('Profile has been specified, adding timers to event loop')
+            self._timer = None
 
         # init parent with remaining kwargs
         # we want to do this init first so we can fail on the parent's
@@ -46,12 +52,19 @@ class MessageWorker(Process):
         # Wait for incoming connection before doing anything
         self.wait_for_incoming_connection()
 
+        # add timer
+        if self.profile:
+            self._timer = Timer(MESSAGE_WORKER_TIMES_FILE)
+
         # Enter Event loop
         logger.debug('Entering event loop for Message Worker')
         while not self.kill_process:
+            if self.profile:
+                self._timer.start()
+
             request_data = self._conn.recv(self.buffer_size)
             logger.debug('Request data: %s' %(request_data))
-            print request_data
+            #print request_data
 
 	    # find object that user is asking for
             obj = None
@@ -83,6 +96,11 @@ class MessageWorker(Process):
 	    msg = self.message_q.get()
             logger.debug(msg)
 	    self._conn.send(msg)
+            if self.profile:
+                self._timer.stop()
+
+        if self.profile:
+            self._timer.cleanup()
 
         # clean up socket on close
         logger.debug('Closing socket connection')
@@ -121,6 +139,7 @@ class InputFrameWorker(Process):
         #self._stream.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
 
         while not self.kill_process:
+            logger.warning(self.kill_process)
             ret, frame = self._stream.read()
             if ret:
                 self.img_input_q.put(frame)
@@ -192,6 +211,13 @@ class ObjectDetectoResponseWorker(Process):
     '''
     def __init__(self, img_input_q, request_q, message_q,
                  *args, **kwargs):
+
+        # check if profiler has been specified
+        self.profile = kwargs.pop('profile', False)
+        if self.profile:
+            logger.warning('Profile has been specified, adding timers to event loop')
+            self._timer = None
+
         super(ObjectDetectoResponseWorker, self).__init__(*args, **kwargs)
         self.input_img_q = img_input_q
         self.request_q = request_q
@@ -211,9 +237,14 @@ class ObjectDetectoResponseWorker(Process):
 	# Load object detector after parent process forks
         self._object_detector = ObjectDetector()
 
+        if self.profile:
+            self._timer = Timer(OBJECT_DETECT_TIMES_FILE)
+
         # Enter Event loop for worker
         logger.debug('Entering event loop for object detector response worker')
         while not self.kill_process:
+            if self.profile:
+                self._timer.start()
             # block until the MessageWorker puts something in the
             # request_q
             obj_to_find = self.request_q.get()
@@ -243,7 +274,11 @@ class ObjectDetectoResponseWorker(Process):
 
             # add msg to message_q
             self.message_q.put(msg)
+            if self.profile:
+                self._timer.stop()
 
+        if self.profile:
+            self._timer.cleanup()
         self._object_detector.cleanup()
 
     def build_msg(self, obj_to_find, detected_objects):
@@ -267,6 +302,5 @@ class ObjectDetectoResponseWorker(Process):
 		msg = obj_to_find + ' is to your left'
 	    else:
 		msg = obj_to_find + ' is to your right'
-        print msg
+        #print msg
         return msg
-

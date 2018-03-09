@@ -45,3 +45,9 @@ BUFFER_SIZE = 1024
 ###
 REFERENCE_OBJECTS_FILE = os.path.join(APP_FOLDER, 'reference_objects.yaml')
 
+
+###
+## Profiling file outputs
+###
+MESSAGE_WORKER_TIMES_FILE = os.path.join(APP_FOLDER, 'message_worker_profile.txt')
+OBJECT_DETECT_TIMES_FILE = os.path.join(APP_FOLDER, 'object_detect_response_worker.txt')

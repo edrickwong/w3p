@@ -18,7 +18,7 @@ from utils.defaults import *
 from utils.worker_utils import MessageWorker, OutputImageStreamWorker, \
                                ObjectDetectoResponseWorker, \
                                InputFrameWorker
-
+from utils.profiler_utils import Profiler
 from multiprocessing import Queue, Pool, Process
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
@@ -77,12 +77,15 @@ def main():
                         action='store_true', help='show visualization')
     parser.add_argument('--no-debug', dest='debug',
                         action='store_false', help='do not show visualiation')
+    parser.add_argument('--profile', dest='profile',
+                        action='store_true', help='profile the app')
     parser.set_defaults(debug=False)
     parser.set_defaults(visualize=True)
     args = parser.parse_args()
 
     # boolean to determine if inference should be visualized
     visualize_output = args.visualize
+
     if args.debug:
         logger.setLevel(multiprocessing.SUBDEBUG)
     else:
@@ -102,6 +105,11 @@ def main():
     else:
         logger.warning('Ran into unexpected error trying to close other procs' \
                        ' Continuing with the app')
+    # check if we are profiling the app
+    profile = args.profile
+    if profile:
+        visualize_output = False
+        logger.warning('Profile has been specified.. turning off display')
 
     # override num workers if tensorflow gpu is being used
     num_workers = args.num_workers
@@ -140,26 +148,32 @@ def main():
             output_image_stream_workers.append(worker)
 
     # workers required to interface with google home/flask client
-    msg_worker = MessageWorker(request_q, message_q)
+    msg_worker = MessageWorker(request_q, message_q, profile=profile)
     msg_worker.start()
-    response_worker = ObjectDetectoResponseWorker(input_q, request_q, message_q)
+    response_worker = ObjectDetectoResponseWorker(input_q, request_q, message_q, profile=profile)
     response_worker.start()
 
-    # Parent event loop
-    logger.debug('Entering parent process event loop')
-    while True:
-        try:
-            if visualize_output:
-                output_rgb = cv2.cvtColor(output_q.get(), cv2.COLOR_RGB2BGR)
-                cv2.imshow('Video', output_rgb)
-                #logger.debug('Showing output')
+    # check if we need to turn on profiler
+    if profile:
+        profiler = Profiler(iterations=10)
+        profiler.run_test()
+    else:
+        # Parent event loop
+        logger.debug('Entering parent process event loop')
+        while True:
+            try:
+                if visualize_output:
+                    output_rgb = cv2.cvtColor(output_q.get(), cv2.COLOR_RGB2BGR)
+                    cv2.imshow('Video', output_rgb)
+                    #logger.debug('Showing output')
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+
+            except KeyboardInterrupt:
                 break
 
-        except KeyboardInterrupt:
-            break
-
+    logger.warning('Attempting to kill all procs')
     # TODO: Make kill process a multiproc semaphore/lock/signal that all the
     # processes can just interface with
     input_worker.kill_process = True
@@ -178,7 +192,7 @@ def main():
         for worker in output_image_stream_workers:
             worker.join()
 
-    cv2.destroyAllWindows()
+        cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':

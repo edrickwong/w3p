@@ -11,8 +11,9 @@ while True:
     try:
         message = raw_input("What do you want to say: ")
         s.send(message)
+        reply = s.recv(BUFFER_SIZE)
+        print reply
     except KeyboardInterrupt:
         break
 
 s.close()
-
