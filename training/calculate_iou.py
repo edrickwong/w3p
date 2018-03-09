@@ -18,7 +18,7 @@ from object_detector_app.object_detect_single import detect_objects_no_vis
 from training.utils.image_utils import ImageContainer, build_labelled_csv_dictionary, ImageObject, TRAIN_FOLDER
 
 DETECT_THRESHOLD = 0.3
-IOU_THRESHOLD = 0.4
+IOU_THRESHOLDS = np.arange(0.5,1,0.05)
 IMAGE = "images"
 IMAGES_FOLDER = os.path.join(TRAIN_FOLDER, IMAGE)
 CSV_TEST_FILE = os.path.join(TRAIN_FOLDER, 'images.csv')
@@ -35,15 +35,6 @@ label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
 categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES,
                                                             use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
-
-iou_res = []
-TP = {}
-FP = {}
-class_precision = {}
-
-for i in range(len(category_index)):
-    TP[str(category_index[i+1]['name'])] = 0
-    FP[str(category_index[i+1]['name'])] = 0
 
 def generator_for_test_image(csv_dict):
     for f in os.listdir(IMAGES_FOLDER):
@@ -81,77 +72,89 @@ def main():
         sess = tf.Session(graph=detection_graph)
 
     csv_test_dict = build_labelled_csv_dictionary(CSV_TEST_FILE)
-    for image in generator_for_test_image(csv_test_dict):
-        boxes, scores, classes, num_detections = detect_objects_no_vis(image.image, sess, detection_graph)
-        # for scores greater than threshold
-        count = 0
-        for i in range(len(scores[0])):
-            pred_box = []
-            ground_box = []
-            if scores[0][i] < DETECT_THRESHOLD:
-                break
-            box = np.squeeze(boxes[0][i])
-            pred_box = [box[0]*image.width, box[2]*image.width, box[1]*image.height, box[3]*image.height]
-            obj_class = category_index[classes[0][i]]['name']
-            img = ImageObject(image.width, image.height, obj_class, box[0]*image.width, box[1]*image.height, box[2]*image.width, box[3]*image.height)
-            image.detected_objects.append(img)
-            ious = []
-            for obj in image.labelled_objects:
-                if str(obj.obj_type) == str(obj_class):
+
+    maps = []
+    TP = {}
+    FP = {}
+    for IOU_THRESHOLD in IOU_THRESHOLDS: 
+        iou_res = []
+        for i in range(len(category_index)):
+            TP[str(category_index[i+1]['name'])] = 0
+            FP[str(category_index[i+1]['name'])] = 0
+        class_precision = {}
+        for image in generator_for_test_image(csv_test_dict):
+            boxes, scores, classes, num_detections = detect_objects_no_vis(image.image, sess, detection_graph)
+            # for scores greater than threshold
+            count = 0
+            for i in range(len(scores[0])):
+                pred_box = []
+                ground_box = []
+                if scores[0][i] < DETECT_THRESHOLD:
+                    break
+                box = np.squeeze(boxes[0][i])
+                pred_box = [box[1]*image.width, box[3]*image.width, box[0]*image.height, box[2]*image.height]
+                obj_class = category_index[classes[0][i]]['name']
+                img = ImageObject(image.width, image.height, obj_class, box[1]*image.width, box[0]*image.height, box[3]*image.width, box[2]*image.height)
+                image.detected_objects.append(img)
+                ious = []
+                for obj in image.labelled_objects:
+                    if str(obj.obj_type) == str(obj_class):
+                        ground_box = [float(obj.xmin), float(obj.xmax), float(obj.ymin), float(obj.ymax)]
+                        ious.append(iou(ground_box,pred_box))
+                # calculate iou
+                if ground_box and pred_box:
+                    iou_res.append(max(ious))
+                    image.ious.append(max(ious))
+
+                # calculate iou and map
+                iou_class = {}
+                for obj in image.labelled_objects: # calculate iou to each object in image
                     ground_box = [float(obj.xmin), float(obj.xmax), float(obj.ymin), float(obj.ymax)]
-                    ious.append(iou(ground_box,pred_box))
-            # calculate iou
-            if ground_box and pred_box:
-                iou_res.append(max(ious))
-                image.ious.append(max(ious))
+                    iou_class[str(obj.obj_type)] = iou(ground_box,pred_box)
+                # get max iou
+                max_iouClass = max(iou_class.iteritems(), key=operator.itemgetter(1))[0]
+                # get precisions
+                if iou_class[max_iouClass] >= IOU_THRESHOLD:
+                    if max_iouClass == str(obj_class):
+                        TP[max_iouClass] += 1
+                    else:
+                        FP[max_iouClass] += 1
+                        #image.draw_boxes()
+                        #cv2.imshow('original', image.image)
+                        #cv2.waitKey(0)
+                        #cv2.destroyAllWindows()
+                        #pdb.set_trace()
+                count += 1
+                if count == len(image.labelled_objects):
+                    break
 
-            # calculate iou and map
-            iou_class = {}
-            for obj in image.labelled_objects: # calculate iou to each object in image
-                ground_box = [float(obj.xmin), float(obj.xmax), float(obj.ymin), float(obj.ymax)]
-                iou_class[str(obj.obj_type)] = iou(ground_box,pred_box)
-            # get max iou
-            max_iouClass = max(iou_class.iteritems(), key=operator.itemgetter(1))[0]
-            # get precisions
-            if iou_class[max_iouClass] >= IOU_THRESHOLD:
-                if max_iouClass == str(obj_class):
-                    TP[max_iouClass] += 1
-                else:
-                    FP[max_iouClass] += 1
-                    image.draw_boxes()
-                    cv2.imshow('original', image.image)
-                    cv2.waitKey(0)
-                    cv2.destroyAllWindows()
-                    pdb.set_trace()
-            count += 1
-            if count == len(image.labelled_objects):
-                break
+            #image.draw_boxes()
+            #cv2.imshow('original', image.image)
+            #cv2.waitKey(0)
+            #cv2.destroyAllWindows()
+            #pdb.set_trace()
 
-        #image.draw_boxes()
-        #cv2.imshow('original', image.image)
-        #cv2.waitKey(0)
-        #cv2.destroyAllWindows()
-        #pdb.set_trace()
+        # mean average precision
+        mean_ap = 0
+        # average precision for each class
+        for i in range(len(category_index)):
+            category = str(category_index[i+1]['name'])
+            if TP[category] == 0 and FP[category] == 0:
+                class_precision[category] = 0
+            else:
+                class_precision[category] = TP[category] / float(TP[category] + FP[category]) * 100
+            mean_ap += class_precision[category]
 
-    # mean average precision
-    mean_ap = 0
-    # average precision for each class
-    for i in range(len(category_index)):
-        category = str(category_index[i+1]['name'])
-        if TP[category] == 0 and FP[category] == 0:
-            class_precision[category] = 0
-        else:
-            class_precision[category] = TP[category] / float(TP[category] + FP[category]) * 100
-        mean_ap += class_precision[category]
-
-    mean_ap = mean_ap / float(len(category_index))
+        mean_ap = mean_ap / float(len(category_index))
+        print 'mAP at ', IOU_THRESHOLD, ': ',mean_ap
+        maps.append(mean_ap)
 
     # print average iou
-    print 'average iou: ' , np.average(iou_res)
-    print 'max iou: ' , max(iou_res)
-    print 'min iou: ' , min(iou_res)
-    print 'class precisions: ', class_precision
-    print 'mAP: ', mean_ap
+    #print 'average iou: ' , np.average(iou_res)
+    #print 'max iou: ' , max(iou_res)
+    #print 'min iou: ' , min(iou_res)
+    #print 'class precisions: ', class_precision
+    print 'mAP final: ', np.average(maps)
 
 if __name__ == "__main__":
     main()
