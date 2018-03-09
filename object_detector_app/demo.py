@@ -155,7 +155,7 @@ def main():
 
     # check if we need to turn on profiler
     if profile:
-        profiler = Profiler(iterations=10)
+        profiler = Profiler(iterations=1000)
         profiler.run_test()
     else:
         # Parent event loop
@@ -177,11 +177,17 @@ def main():
     # TODO: Make kill process a multiproc semaphore/lock/signal that all the
     # processes can just interface with
     input_worker.kill_process = True
-    input_worker.join()
+    input_worker.terminate()
+    input_worker.join(5)
+    logger.warning('Finished Joining input worker')
     msg_worker.kill_process = True
-    msg_worker.join()
+    msg_worker.terminate()
+    msg_worker.join(5)
+    logger.warning('Finished joining msg worker')
     response_worker.kill_process = True
-    response_worker.join()
+    response_worker.terminate()
+    response_worker.join(5)
+    logger.warning('Finished joining response worker')
 
     # splitting the kill signal and join will lead to slightly more
     # concurrency
@@ -194,6 +200,8 @@ def main():
 
         cv2.destroyAllWindows()
 
+    profiler.print_summary_results()
+    logger.warning('Exiting App. Thank you')
 
 if __name__ == '__main__':
     main()
