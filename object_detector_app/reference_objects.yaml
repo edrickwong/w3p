@@ -1,6 +1,7 @@
 - obj_type: "fridge"
   real_height: 40
   real_width: 50
+<<<<<<< HEAD
   xmin: 10
   xmax: 200
   ymin: 30
@@ -12,3 +13,17 @@
   xmax: 800
   ymin: 200
   ymax: 300
+=======
+  xmin: 0.02
+  xmax: 0.31
+  ymin: 0.08
+  ymax: 1.0
+- obj_type: "table"
+  real_height: 40
+  real_width: 50
+  xmin: 0.7
+  xmax: 1.0
+  ymin: 0.55
+  ymax: 0.83
+
+>>>>>>> 48301a39367870c3bdf0d46a67790921296c13c9

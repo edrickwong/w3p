@@ -4,7 +4,11 @@ import time
 import argparse
 import multiprocessing
 import numpy as np
+import os
 import socket
+import signal
+import sys
+import subprocess
 import tensorflow as tf
 
 from utils.misc_utils import is_using_tensorflow_gpu
@@ -19,14 +23,48 @@ from multiprocessing import Queue, Pool, Process
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 
+
+logger = multiprocessing.log_to_stderr()
+
+def cleanup_existing_processes():
+    grep_arg = 'python %s' %(sys.argv[0])
+    cmd = 'ps aux | grep \'%s\' | grep -v grep' %(grep_arg)
+    p = subprocess.Popen(cmd, shell=True,
+                         stdout=subprocess.PIPE)
+    out, err = p.communicate()
+    pids_to_kill = []
+    my_pid = os.getpid()
+
+    for line in out.splitlines():
+        if 'PID' in line:
+            continue
+        line = line.split()
+        pid = int(line[1])
+        #start_time = line[-4]
+        # don't kill current process
+        if pid != my_pid:
+            pids_to_kill.append(pid)
+
+    print 'Sending sigkill to pids: %s' %(pids_to_kill)
+    for pid in pids_to_kill:
+        os.kill(pid, signal.SIGKILL)
+
+    if err:
+        print err
+        return False
+
+    return True
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-src', '--source', dest='video_source', type=int,
                         default=0, help='Device index of the camera.')
-    parser.add_argument('-wd', '--width', dest='width', type=int,
-                        default=480, help='Width of the frames in the video stream.')
-    parser.add_argument('-ht', '--height', dest='height', type=int,
-                        default=360, help='Height of the frames in the video stream.')
+    # opencv doesnt allow me to set these parameters off hand
+    #parser.add_argument('-wd', '--width', dest='width', type=int,
+    #                    default=480, help='Width of the frames in the video stream.')
+    #parser.add_argument('-ht', '--height', dest='height', type=int,
+    #                    default=360, help='Height of the frames in the video stream.')
     parser.add_argument('-num-w', '--num-workers', dest='num_workers', type=int,
                         default=1, help='Number of workers.')
     parser.add_argument('-q-size', '--queue-size', dest='queue_size', type=int,
@@ -45,11 +83,25 @@ def main():
 
     # boolean to determine if inference should be visualized
     visualize_output = args.visualize
-    logger = multiprocessing.log_to_stderr()
     if args.debug:
         logger.setLevel(multiprocessing.SUBDEBUG)
     else:
         logger.setLevel(multiprocessing.SUBWARNING)
+
+    # cleanup existing processes..
+    # All the underlying workers/threads are daemon threads/procs respectively.
+    # This means that there is a chance that some of their resources, ie.
+    # file handles and sockets haven't  been cleaned up gracefully because of
+    # orphaned procs. Different kernels implement different methods of garbage
+    # collection to cleanup these orphaned resources which might lead to some
+    # unwanted/weird errors.
+    logger.warning('Attempting to cleaning up any other instances of %s' \
+                    %(sys.argv[0]))
+    if cleanup_existing_processes():
+        logger.warning('Cleaned up other processes, starting main app')
+    else:
+        logger.warning('Ran into unexpected error trying to close other procs' \
+                       ' Continuing with the app')
 
     # override num workers if tensorflow gpu is being used
     num_workers = args.num_workers
@@ -72,11 +124,10 @@ def main():
     request_q = Queue(maxsize=args.queue_size)
     message_q = Queue(maxsize=args.queue_size)
 
+    logger.warning('Spawning all relevant workers')
     # input stream worker
-    input_worker = InputFrameWorker(args.video_source,
-                                    args.width,
-                                    args.height,
-                                    input_q)
+    input_worker = InputFrameWorker(input_q,
+                                    args.video_source)
     input_worker.start()
 
     # output stream workers, required to visualize inference on the
@@ -102,6 +153,7 @@ def main():
                 output_rgb = cv2.cvtColor(output_q.get(), cv2.COLOR_RGB2BGR)
                 cv2.imshow('Video', output_rgb)
                 #logger.debug('Showing output')
+
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
