@@ -102,8 +102,8 @@ def main():
             if visualize_output:
                 output_rgb = cv2.cvtColor(output_q.get(), cv2.COLOR_RGB2BGR)
                 cv2.imshow('Video', output_rgb)
-                #logger.warning('Showing output')
-                #logger.warning(output_rgb.shape)
+                #logger.debug('Showing output')
+
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 

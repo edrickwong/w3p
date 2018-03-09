@@ -5,10 +5,10 @@ import yaml
 from defaults import *
 from training.utils.image_utils import ImageObject, WHITE
 from object_detection.utils.visualization_utils import draw_bounding_box_on_image_array
-from multiprocessing import get_logger
-from ctypes import c_float
-from threading import Thread
+
 from os.path import getmtime
+from multiprocessing import get_logger
+from threading import Thread
 
 logger = get_logger()
 
@@ -32,14 +32,23 @@ class ReferenceObjectsHelper(object):
         self._worker_thread.daemon = True
         self._worker_thread.start()
 
-    def load_reference_objects(self,load_fresh=False):
+    def load_reference_objects(self, load_fresh=False):
         if load_fresh:
-              self.reference_objects = []
-            
-        for item in yaml.load(open(REFERENCE_OBJECTS_FILE)):
-            self.reference_objects.append(ReferenceObject(self.width,
-                                                          self.height,
-                                                          **item))
+            self.reference_objects = []
+
+        try:
+            for item in yaml.load(open(REFERENCE_OBJECTS_FILE)):
+                if type(item) == dict:
+                    self.reference_objects.append(ReferenceObject(self.width,
+                                                                  self.height,
+                                                                  **item))
+                else:
+                    logger.warning('Invalid entry type for Reference Object')
+        except TypeError:
+            logger.warning('Invalid entry type for Reference Object')
+        # dont raise on any errors cuz we are goign to be reloading on change
+        except:
+            pass
 
     def visualize_reference_objects(self, img):
         '''
@@ -89,15 +98,3 @@ class ReferenceObject(ImageObject):
             setattr(self, k, v)
 
         logger.warning(self)
-
-    def draw_bounding_box(self, img):
-        draw_bounding_box_on_image_array(img,
-                                         self.ymin,
-                                         self.xmin,
-                                         self.ymax,
-                                         self.xmax,
-                                         color='white',
-                                         thickness=6,
-                                         display_str_list=(self.obj_type, ),
-                                         use_normalized_coordinates=False)
-

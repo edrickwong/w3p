@@ -40,6 +40,7 @@ class MessageWorker(Process):
 
         # boolean to see if we should end the event loop
         self.kill_process = False
+        self.daemon = True
 
     def run(self):
         # Wait for incoming connection before doing anything
@@ -110,6 +111,7 @@ class InputFrameWorker(Process):
 
         # kill switch
         self.kill_process = False
+        self.daemon = True
 
     def run(self):
         logger.debug('Entering event loop for input worker')
@@ -149,6 +151,7 @@ class OutputImageStreamWorker(Process):
 
         # Bool to kill event loop
         self.kill_process = False
+        self.daemon = True
 
     def run(self):
         # encapsulate the necessary helper objects
@@ -202,6 +205,7 @@ class ObjectDetectoResponseWorker(Process):
 
         # Bool to kill event loop
         self.kill_process = False
+        self.daemon = True
 
     def run(self):
 	# Load object detector after parent process forks
