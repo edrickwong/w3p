@@ -5,6 +5,7 @@ import yaml
 from defaults import *
 from training.utils.image_utils import ImageObject, WHITE
 from object_detection.utils.visualization_utils import draw_bounding_box_on_image_array
+
 from os.path import getmtime
 from multiprocessing import get_logger
 from threading import Thread
@@ -20,7 +21,10 @@ class ReferenceObjectsHelper(object):
     '''
     CHECK_INTERVAL = 5
 
-    def __init__(self):
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
         self.reference_objects = []
         self.load_reference_objects()
 
@@ -35,7 +39,9 @@ class ReferenceObjectsHelper(object):
         try:
             for item in yaml.load(open(REFERENCE_OBJECTS_FILE)):
                 if type(item) == dict:
-                    self.reference_objects.append(ReferenceObject(**item))
+                    self.reference_objects.append(ReferenceObject(self.width,
+                                                                  self.height,
+                                                                  **item))
                 else:
                     logger.warning('Invalid entry type for Reference Object')
         except TypeError:
@@ -75,9 +81,20 @@ class ReferenceObject(ImageObject):
             real_size = real_size of the object
             real_width = real_width of the object
     '''
-    def __init__(self, *args, **kwargs):
+    def __init__(self, width, height,
+                 passing_normalized_coords=True, **kwargs):
+
+        # for the dimensions variable denormalize coords
+        if passing_normalized_coords:
+            self.xmin = int(kwargs.pop('xmin') * width)
+            self.xmax = int(kwargs.pop('xmax') * width)
+            self.ymin = int(kwargs.pop('ymin') * height)
+            self.ymax = int(kwargs.pop('ymax') * height)
+
         # Feeling lazy af right now and violating one of the zens of
         # python... but going to do initalization implicitly rather
         # than explicitly
         for k, v in kwargs.iteritems():
             setattr(self, k, v)
+
+        logger.warning(self)

@@ -19,14 +19,17 @@ from multiprocessing import Queue, Pool, Process
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 
+logger = multiprocessing.log_to_stderr()
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-src', '--source', dest='video_source', type=int,
                         default=0, help='Device index of the camera.')
-    parser.add_argument('-wd', '--width', dest='width', type=int,
-                        default=480, help='Width of the frames in the video stream.')
-    parser.add_argument('-ht', '--height', dest='height', type=int,
-                        default=360, help='Height of the frames in the video stream.')
+    # opencv doesnt allow me to set these parameters off hand
+    #parser.add_argument('-wd', '--width', dest='width', type=int,
+    #                    default=480, help='Width of the frames in the video stream.')
+    #parser.add_argument('-ht', '--height', dest='height', type=int,
+    #                    default=360, help='Height of the frames in the video stream.')
     parser.add_argument('-num-w', '--num-workers', dest='num_workers', type=int,
                         default=1, help='Number of workers.')
     parser.add_argument('-q-size', '--queue-size', dest='queue_size', type=int,
@@ -45,7 +48,6 @@ def main():
 
     # boolean to determine if inference should be visualized
     visualize_output = args.visualize
-    logger = multiprocessing.log_to_stderr()
     if args.debug:
         logger.setLevel(multiprocessing.SUBDEBUG)
     else:
@@ -72,11 +74,10 @@ def main():
     request_q = Queue(maxsize=args.queue_size)
     message_q = Queue(maxsize=args.queue_size)
 
+    logger.warning('Spawning all relevant workers')
     # input stream worker
-    input_worker = InputFrameWorker(args.video_source,
-                                    args.width,
-                                    args.height,
-                                    input_q)
+    input_worker = InputFrameWorker(input_q,
+                                    args.video_source)
     input_worker.start()
 
     # output stream workers, required to visualize inference on the
@@ -102,6 +103,7 @@ def main():
                 output_rgb = cv2.cvtColor(output_q.get(), cv2.COLOR_RGB2BGR)
                 cv2.imshow('Video', output_rgb)
                 #logger.debug('Showing output')
+
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
