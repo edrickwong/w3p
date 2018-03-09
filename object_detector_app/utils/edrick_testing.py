@@ -15,6 +15,6 @@ from reference_objects_utils import ReferenceObjectsHelper
 # %%
 helper = ReferenceObjectsHelper()
 list = helper.reference_objects
-print(len(list))
+print(list[1].obj_type)
 print(list[1].real_width)
 print(list[1].midpoint[0])

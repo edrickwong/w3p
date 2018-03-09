@@ -226,14 +226,16 @@ class ObjectDetectoResponseWorker(Process):
             return 0
         else:
             #if reference is left of object, should return negative distance
-            return ref_xmax-obj_xmin
+            print(ref_xmax-obj_xmin)
+            return obj_xmin-ref_xmax
 
     def closest_right_edge_distance(self,obj_xmin, obj_xmax,ref_xmin):
         #check if object is infront of reference
-        if obj_xmin <= ref_xmax <= obj_xmax:
+        if obj_xmin <= ref_xmin <= obj_xmax:
             return 0
         else:
             #if reference is right of object, should return negative distance
+            print(ref_xmin-obj_xmax)
             return obj_xmax-ref_xmin
 
     def calculate_nearest_reference(self, obj_to_find, detected_objects):
@@ -263,9 +265,9 @@ class ObjectDetectoResponseWorker(Process):
             left_min = min(left_distances)
             right_min = min(right_distances)
             if left_min < right_min:
-                return self.ref_list(left_distances.index(left_min)),0
+                return self.ref_list[left_distances.index(left_min)],0
             else:
-                return self.ref_list(right_distances.index(right_min)),1
+                return self.ref_list[right_distances.index(right_min)],1
 
     def build_msg(self, obj_to_find, detected_objects):
         msg = ''
@@ -291,5 +293,5 @@ class ObjectDetectoResponseWorker(Process):
 	    # else:
 		# msg = obj_to_find + ' is to your right'
 
-            msg = reference
+            msg = reference.obj_type
         return msg
