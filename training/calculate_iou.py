@@ -18,11 +18,11 @@ from object_detector_app.object_detect_single import detect_objects_no_vis
 from training.utils.image_utils import ImageContainer, build_labelled_csv_dictionary, ImageObject, TRAIN_FOLDER
 
 DETECT_THRESHOLD = 0.3
-IOU_THRESHOLD = 0.3
+IOU_THRESHOLD = 0.4
 IMAGE = "images"
 IMAGES_FOLDER = os.path.join(TRAIN_FOLDER, IMAGE)
 CSV_TEST_FILE = os.path.join(TRAIN_FOLDER, 'images.csv')
-MODEL_NAME = 'model_2018_03_06'
+MODEL_NAME = 'model_2018_03_08'
 PATH_TO_CKPT = os.path.join(TRAIN_FOLDER, MODEL_NAME, 'frozen_inference_graph.pb')
 #MODEL_NAME = 'ssd_mobilenet_v1_coco_11_06_2017'
 #PATH_TO_CKPT = os.path.join('/Users/lindawang/w3p/object_detector_app/object_detection/ssd_mobilenet_v1_coco_11_06_2017', 'frozen_inference_graph.pb')
@@ -84,6 +84,7 @@ def main():
     for image in generator_for_test_image(csv_test_dict):
         boxes, scores, classes, num_detections = detect_objects_no_vis(image.image, sess, detection_graph)
         # for scores greater than threshold
+        count = 0
         for i in range(len(scores[0])):
             pred_box = []
             ground_box = []
@@ -117,12 +118,20 @@ def main():
                     TP[max_iouClass] += 1
                 else:
                     FP[max_iouClass] += 1
+                    image.draw_boxes()
+                    cv2.imshow('original', image.image)
+                    cv2.waitKey(0)
+                    cv2.destroyAllWindows()
+                    pdb.set_trace()
+            count += 1
+            if count == len(image.labelled_objects):
+                break
 
-        image.draw_boxes()
-        cv2.imshow('original', image.image)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-        pdb.set_trace()
+        #image.draw_boxes()
+        #cv2.imshow('original', image.image)
+        #cv2.waitKey(0)
+        #cv2.destroyAllWindows()
+        #pdb.set_trace()
 
     # mean average precision
     mean_ap = 0
