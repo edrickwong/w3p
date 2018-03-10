@@ -25,7 +25,7 @@ CSV_TEST_FILE = os.path.join(TRAIN_FOLDER, 'images.csv')
 MODEL_NAME = 'model_2018_03_08'
 PATH_TO_CKPT = os.path.join(TRAIN_FOLDER, MODEL_NAME, 'frozen_inference_graph.pb')
 #MODEL_NAME = 'ssd_mobilenet_v1_coco_11_06_2017'
-#PATH_TO_CKPT = os.path.join('/Users/lindawang/w3p/object_detector_app/object_detection/ssd_mobilenet_v1_coco_11_06_2017', 'frozen_inference_graph.pb')
+#PATH_TO_CKPT = os.path.join('/Users/justin/Github/w3p/object_detector_app/object_detection/ssd_mobilenet_v1_coco_11_06_2017', 'frozen_inference_graph.pb')
 PATH_TO_LABELS = os.path.join(TRAIN_FOLDER, 'label_map.pbtxt')
 
 NUM_CLASSES = 4
