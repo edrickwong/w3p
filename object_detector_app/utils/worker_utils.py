@@ -333,7 +333,7 @@ class ObjectDetectoResponseWorker(Process):
         # return msg
             reference, location, distance = self.calculate_nearest_reference(obj_to_find, detected_objects)
             if distance == 0:
-                msg = "The " + obj_to_find + " is in front of the " + reference
+                msg = "The " + obj_to_find + " is in front of the " + reference.obj_type
             elif location == 0:
                 msg = "The " + obj_to_find + " is " + str(distance) + " left of " + reference.obj_type
             else:
