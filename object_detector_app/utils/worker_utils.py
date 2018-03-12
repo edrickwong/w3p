@@ -246,12 +246,12 @@ class ObjectDetectoResponseWorker(Process):
 
         self._object_detector.cleanup()
 
-    def closest_left_edge_distance(self,obj_xmin, obj_xmax,ref_min,ref_xmax):
+    def closest_left_edge_distance(self,obj_xmin, obj_xmax,ref_xmin,ref_xmax):
         #check if object is infront of reference
         #
         #
         # YO DAMN LOGIC NOT CORRECT HERE
-        if obj_xmin <= ref_xmax <= obj_xmax:
+        if ref_xmin <= obj_xmin <= ref_xmax:
             print('left edge numbers: 0')
             return 0
         else:
@@ -263,9 +263,9 @@ class ObjectDetectoResponseWorker(Process):
             print(ref_xmax-obj_xmin)
             return obj_xmin-ref_xmax
 
-    def closest_right_edge_distance(self,obj_xmin, obj_xmax,ref_xmin):
+    def closest_right_edge_distance(self,obj_xmin, obj_xmax,ref_xmin,ref_xmax):
         #check if object is infront of reference
-        if obj_xmin <= ref_xmin <= obj_xmax:
+        if ref_xmin <= obj_xmax <= ref_xmax:
             print('right edge numbers: 0')
             return 0
         else:
@@ -290,22 +290,22 @@ class ObjectDetectoResponseWorker(Process):
         obj_y = [detected_objects.get(obj_to_find)[0],
                 detected_objects.get(obj_to_find)[2]]
 
-        left_distances = [self.closest_left_edge_distance(obj_x[0],obj_x[1], norm_xmin, x.norm_xmax)
+        left_distances = [self.closest_left_edge_distance(obj_x[0],obj_x[1], x.norm_xmin, x.norm_xmax)
                 for x in self.ref_list]
-        right_distances = [self.closest_right_edge_distance(obj_x[0],obj_x[1], norm_xmin, x.norm_xmin)
+        right_distances = [self.closest_right_edge_distance(obj_x[0],obj_x[1], x.norm_xmin, x.norm_xmax)
                 for x in self.ref_list]
 
         if 0 in left_distances:
-            return self.ref_list(left_distances.index(0)), 0
+            return self.ref_list[left_distances.index(0)], 0, 0
         elif 0 in right_distances:
-            return sself.ref_list(right_distances.index(0)), 1
+            return self.ref_list[right_distances.index(0)], 1, 0
         else:
             left_min = min(left_distances)
             right_min = min(right_distances)
             if left_min < right_min:
-                return self.ref_list[left_distances.index(left_min)],0
+                return self.ref_list[left_distances.index(left_min)],0, left_min
             else:
-                return self.ref_list[right_distances.index(right_min)],1
+                return self.ref_list[right_distances.index(right_min)],1, right_min
 
 
     def build_msg(self, obj_to_find, detected_objects):
@@ -331,6 +331,12 @@ class ObjectDetectoResponseWorker(Process):
 		# msg = obj_to_find + ' is to your right'
         # print msg
         # return msg
-            reference, location = self.calculate_nearest_reference(obj_to_find, detected_objects)
-            msg = reference.obj_type
+            reference, location, distance = self.calculate_nearest_reference(obj_to_find, detected_objects)
+            if distance == 0:
+                msg = "The " + obj_to_find + " is in front of the " + reference
+            elif location == 0:
+                msg = "The " + obj_to_find + " is " + str(distance) + " left of " + reference.obj_type
+            else:
+                msg = "The " + obj_to_find + " is " + str(distance) + " right of " + reference.obj_type
+
         return msg
