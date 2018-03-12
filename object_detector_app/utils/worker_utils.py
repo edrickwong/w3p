@@ -235,11 +235,11 @@ class ObjectDetectoResponseWorker(Process):
 	    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             # do inference for frame capture
-	    detected_objects = self._object_detector.detect_objects(frame_rgb)
+	    detected_objects, confidence_scores = self._object_detector.detect_objects(frame_rgb)
 
             # construct message that we should pass back to user based on
             # detected objects
-            msg = self.build_msg(obj_to_find, detected_objects)
+            msg = self.build_msg(obj_to_find, detected_objects, confidence_scores)
 
             # add msg to message_q
             self.message_q.put(msg)
@@ -308,7 +308,7 @@ class ObjectDetectoResponseWorker(Process):
                 return self.ref_list[right_distances.index(right_min)],1, right_min
 
 
-    def build_msg(self, obj_to_find, detected_objects):
+    def build_msg(self, obj_to_find, detected_objects, confidence_scores):
         msg = ''
 
         '''
@@ -331,12 +331,17 @@ class ObjectDetectoResponseWorker(Process):
 		# msg = obj_to_find + ' is to your right'
         # print msg
         # return msg
+            uncertainty_threshold = 0.6
+            uncertain_start = "I'm not certain but I think the {0}".format(obj_to_find)
+            certain_start = "I see the {0} and it ".format(obj_to_find)
             reference, location, distance = self.calculate_nearest_reference(obj_to_find, detected_objects)
             if distance == 0:
-                msg = "The " + obj_to_find + " is in front of the " + reference.obj_type
+                msg = " is in front of the " + reference.obj_type
             elif location == 0:
-                msg = "The " + obj_to_find + " is " + str(distance) + " left of " + reference.obj_type
+                msg = " is " + str(distance) + " left of " + reference.obj_type
             else:
-                msg = "The " + obj_to_find + " is " + str(distance) + " right of " + reference.obj_type
+                msg = " is " + str(distance) + " right of " + reference.obj_type
 
+
+            msg = (uncertain_start + msg) if confidence_scores[obj_to_find] < uncertainty_threshold else (certain_start + msg)
         return msg

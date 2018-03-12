@@ -105,6 +105,7 @@ class ObjectDetector(object):
 	    feed_dict={image_tensor: image_np_expanded})
 
         class_box = {}
+        confidence_scores = {}
         max_width = 0
 
 	# Only show boxes around these classes
@@ -121,7 +122,8 @@ class ObjectDetector(object):
 			    continue
 			max_width = width
 		    class_box[obj] = np.squeeze(boxes[0][i])
-        return class_box
+            confidence_scores[obj] = scores[0][i]
+        return class_box, confidence_scores
 
     def load_tf_graph(self):
         self._detection_graph = tf.Graph()
