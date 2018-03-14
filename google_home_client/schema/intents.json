@@ -67,79 +67,6 @@
         "fallbackIntent": false, 
         "responses": [
             {
-                "action": "end_conversation", 
-                "resetContexts": false, 
-                "affectedContexts": [], 
-                "messages": [], 
-                "parameters": []
-            }
-        ], 
-        "contexts": [], 
-        "auto": true, 
-        "id": "150e7b71-a037-4466-b2c3-0f4a55e3469f", 
-        "priority": 500000, 
-        "userSays": [
-            {
-                "count": 0, 
-                "isTemplate": false, 
-                "data": [
-                    {
-                        "text": "thanks Google", 
-                        "userDefined": false
-                    }
-                ]
-            }, 
-            {
-                "count": 0, 
-                "isTemplate": false, 
-                "data": [
-                    {
-                        "text": "thank you Google", 
-                        "userDefined": false
-                    }
-                ]
-            }, 
-            {
-                "count": 0, 
-                "isTemplate": false, 
-                "data": [
-                    {
-                        "text": "stop", 
-                        "userDefined": false
-                    }
-                ]
-            }, 
-            {
-                "count": 0, 
-                "isTemplate": false, 
-                "data": [
-                    {
-                        "text": "that's enough", 
-                        "userDefined": false
-                    }
-                ]
-            }, 
-            {
-                "count": 0, 
-                "isTemplate": false, 
-                "data": [
-                    {
-                        "text": "end test", 
-                        "userDefined": false
-                    }
-                ]
-            }
-        ], 
-        "webhookUsed": true, 
-        "webhookForSlotFilling": true, 
-        "events": [], 
-        "name": "end"
-    }, 
-    {
-        "templates": [], 
-        "fallbackIntent": false, 
-        "responses": [
-            {
                 "action": "greet_and_start", 
                 "resetContexts": false, 
                 "affectedContexts": [], 
@@ -314,6 +241,231 @@
                     }, 
                     {
                         "text": "bottle", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "where is the "
+                    }, 
+                    {
+                        "text": "cup", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "i can't find my "
+                    }, 
+                    {
+                        "text": "cup", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "i cannot find my "
+                    }, 
+                    {
+                        "text": "cup", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "do you see my "
+                    }, 
+                    {
+                        "text": "cup", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "can you help me find my "
+                    }, 
+                    {
+                        "text": "cup", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "where is the "
+                    }, 
+                    {
+                        "text": "kettle", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "i can't find my "
+                    }, 
+                    {
+                        "text": "kettle", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "i cannot find my "
+                    }, 
+                    {
+                        "text": "kettle", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "do you see my "
+                    }, 
+                    {
+                        "text": "kettle", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "can you help me find my "
+                    }, 
+                    {
+                        "text": "kettle", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "where is the "
+                    }, 
+                    {
+                        "text": "bowl", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "i can't find my "
+                    }, 
+                    {
+                        "text": "bowl", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "i cannot find my "
+                    }, 
+                    {
+                        "text": "bowl", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "do you see my "
+                    }, 
+                    {
+                        "text": "bowl", 
+                        "meta": "@object", 
+                        "userDefined": true, 
+                        "alias": "object"
+                    }
+                ]
+            }, 
+            {
+                "count": 0, 
+                "isTemplate": false, 
+                "data": [
+                    {
+                        "text": "can you help me find my "
+                    }, 
+                    {
+                        "text": "bowl", 
                         "meta": "@object", 
                         "userDefined": true, 
                         "alias": "object"

@@ -17,3 +17,6 @@
 
 object:
 - bottle: ['bottle', 'flask', 'pitcher']
+- cup: ['cup', 'mug']
+- kettle: ['kettle', 'water boiler']
+- bowl: ['bowl']
