@@ -303,9 +303,9 @@ class ObjectDetectoResponseWorker(Process):
             left_min = min(left_distances)
             right_min = min(right_distances)
             if left_min < right_min:
-                return self.ref_list[left_distances.index(left_min)],0, left_min
+                return self.ref_list[left_distances.index(left_min)],0, int(abs(round(left_min * 2)))
             else:
-                return self.ref_list[right_distances.index(right_min)],1, right_min
+                return self.ref_list[right_distances.index(right_min)],1, int(abs(round(right_min * 2)))
 
 
     def build_msg(self, obj_to_find, detected_objects, confidence_scores):
@@ -316,21 +316,10 @@ class ObjectDetectoResponseWorker(Process):
             ReferenceObject items that contain hard coded
             objects
         '''
-	if 'person' not in detected_objects:
-            msg = 'Cannot locate user.'
-	elif obj_to_find not in detected_objects:
+
+	if obj_to_find not in detected_objects:
 	    msg = 'Unable to locate %s in current view' %(obj_to_find)
 	else:
-	    # mid_p = (detected_objects.get('person')[1] \
-		# 	+ detected_objects.get('person')[3])/2
-	    # mid_o = (detected_objects.get(obj_to_find)[1] \
-		#     + detected_objects.get(obj_to_find)[1])/2
-	    # if mid_p < mid_o:
-		# msg = obj_to_find + ' is to your left'
-	    # else:
-		# msg = obj_to_find + ' is to your right'
-        # print msg
-        # return msg
             uncertainty_threshold = 0.6
             uncertain_start = "I'm not certain but I think the {0}".format(obj_to_find)
             certain_start = "I see the {0} and it ".format(obj_to_find)
@@ -338,9 +327,9 @@ class ObjectDetectoResponseWorker(Process):
             if distance == 0:
                 msg = " is in front of the " + reference.obj_type
             elif location == 0:
-                msg = " is " + str(distance) + " left of " + reference.obj_type
+                msg = " is " + str(distance) + " step left of " + reference.obj_type
             else:
-                msg = " is " + str(distance) + " right of " + reference.obj_type
+                msg = " is " + str(distance) + " step right of " + reference.obj_type
 
 
             msg = (uncertain_start + msg) if confidence_scores[obj_to_find] < uncertainty_threshold else (certain_start + msg)
