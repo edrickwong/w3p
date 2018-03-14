@@ -11,6 +11,26 @@
                     "pitcher"
                 ], 
                 "value": "bottle"
+            }, 
+            {
+                "synonyms": [
+                    "cup", 
+                    "mug"
+                ], 
+                "value": "cup"
+            }, 
+            {
+                "synonyms": [
+                    "kettle", 
+                    "water boiler"
+                ], 
+                "value": "kettle"
+            }, 
+            {
+                "synonyms": [
+                    "bowl"
+                ], 
+                "value": "bowl"
             }
         ]
     }
