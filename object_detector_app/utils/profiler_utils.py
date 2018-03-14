@@ -96,5 +96,5 @@ class Profiler(object):
         data = np.array(data, dtype=np.float)
 	print "Average runtime: %s ms" %(np.average(data))
 	print "Std Dev: %s ms " %(np.std(data))
-	print "95th percentile: %ss" %(np.percentile(data, 95))
-	print "99th percentile: %ss" %(np.percentile(data, 99))
+	print "95th percentile: %s ms" %(np.percentile(data, 95))
+	print "99th percentile: %s ms" %(np.percentile(data, 99))
