@@ -200,7 +200,8 @@ def main():
 
         cv2.destroyAllWindows()
 
-    profiler.print_summary_results()
+    if profile:
+        profiler.print_summary_results()
     logger.warning('Exiting App. Thank you')
 
 if __name__ == '__main__':
