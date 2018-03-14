@@ -62,3 +62,22 @@ end:
   - stop
   - that's enough
   - end test
+
+repeat:
+  UserSays:
+  - can you repeat that
+  - please repeat that
+  - come again
+  - can you say that again
+  - can you say that one more time
+  - what did you just say
+  - sorry i did not get that
+  - i did not get that, come again
+  - can repeat what you just said
+  - sorry?
+  - pardon?
+  - one more time?
+  Annotations:
+  -
+  Events:
+  -
