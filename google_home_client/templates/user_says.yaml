@@ -21,8 +21,26 @@ object-to-detect:
   - i cannot find my bottle
   - do you see my bottle
   - can you help me find my bottle
+  - where is the cup
+  - i can't find my cup
+  - i cannot find my cup
+  - do you see my cup
+  - can you help me find my cup
+  - where is the kettle
+  - i can't find my kettle
+  - i cannot find my kettle
+  - do you see my kettle
+  - can you help me find my kettle
+  - where is the bowl
+  - i can't find my bowl
+  - i cannot find my bowl
+  - do you see my bowl
+  - can you help me find my bowl
   Annotations:
   - bottle: object
+  - cup: object
+  - bowl: object
+  - kettle: object
   Events:
   -
 
@@ -44,3 +62,22 @@ end:
   - stop
   - that's enough
   - end test
+
+repeat:
+  UserSays:
+  - can you repeat that
+  - please repeat that
+  - come again
+  - can you say that again
+  - can you say that one more time
+  - what did you just say
+  - sorry i did not get that
+  - i did not get that, come again
+  - can repeat what you just said
+  - sorry?
+  - pardon?
+  - one more time?
+  Annotations:
+  -
+  Events:
+  -
