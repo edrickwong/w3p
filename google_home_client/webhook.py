@@ -10,7 +10,7 @@ BUFFER_SIZE = 1024
 
 # Fixed responses
 GREETING = "Hi, how can I help you?"
-UNKNOWN_OBJ_RESP = "Sorry, I can only detect bottles right now. Please try a different object."
+UNKNOWN_OBJ_RESP = "Sorry, I can only detect bottles, cups, kettles and bowls right now. Please try a different object."
 
 logging.getLogger('flask_assistant').setLevel(logging.DEBUG)
 app = Flask(__name__)

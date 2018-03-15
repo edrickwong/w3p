@@ -1,14 +1,14 @@
-- obj_type: "toaster oven"
+- obj_type: "monitor"
   real_height: 40
   real_width: 50
-  xmin: 0.02
-  xmax: 0.31
+  xmin: 0.8
+  xmax: 1
   ymin: 0.08
   ymax: 1.0
-- obj_type: "stove"
+- obj_type: "keyboard"
   real_height: 40
   real_width: 50
-  xmin: 0.6
-  xmax: 0.8
-  ymin: 0.55
-  ymax: 0.83
+  xmin: 0.3
+  xmax: 0.7
+  ymin: 0.8
+  ymax: 1
