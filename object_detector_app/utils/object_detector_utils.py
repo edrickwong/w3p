@@ -122,7 +122,9 @@ class ObjectDetector(object):
 			    continue
 			max_width = width
 		    class_box[obj] = np.squeeze(boxes[0][i])
-                confidence_scores[obj] = scores[0][i]
+            	    
+		    if obj not in confidence_scores:
+		    	confidence_scores[obj] = scores[0][0]
         return class_box, confidence_scores
 
     def load_tf_graph(self):
