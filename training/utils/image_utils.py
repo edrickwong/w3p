@@ -131,7 +131,7 @@ class ImageContainer(object):
                 self.image_updated = True
 		box.draw_bounding_box(self.image)
             for box in self.detected_objects:
-		box.draw_bounding_box(self.image)
+		box.draw_bounding_box(self.image,det_object=True)
 
 
 class ImageObject(object):
@@ -257,8 +257,10 @@ class ImageObject(object):
                                    self.xmax,
                                    self.ymax)
 
-    def draw_bounding_box(self, img):
+    def draw_bounding_box(self, img,det_object=False):
 	color = COLOR_ITEMS.get(self.obj_type, 'white')
+        if det_object:
+            color = 'white'
         draw_bounding_box_on_image_array(img,
                                          self.ymin,
                                          self.xmin,
